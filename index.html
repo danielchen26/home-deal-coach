@@ -353,6 +353,35 @@ html[data-theme="dark"] .ycard .yr{color:var(--brand-ink)}
 .kvrow:last-child{border-bottom:none}
 .kvrow b{font-variant-numeric:tabular-nums;font-weight:650}
 
+/* ============ Landing ============ */
+.hero{text-align:center;padding:52px 10px 34px}
+.hbadge{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:650;color:var(--brand-ink);background:var(--brand-soft);border:1px solid var(--brand-soft-2);border-radius:99px;padding:5px 14px}
+.hbadge svg{width:13px;height:13px;flex:0 0 13px}
+.hero h1{font-size:clamp(30px,5.5vw,46px);font-weight:800;letter-spacing:-.03em;line-height:1.14;margin:18px auto 14px;max-width:720px}
+.hgrad{background:linear-gradient(115deg,var(--brand),#2563eb 85%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hsub{font-size:14.5px;color:var(--ink-2);line-height:1.85}
+.cta-row{display:flex;gap:10px;justify-content:center;margin:24px 0 10px;flex-wrap:wrap}
+.cta-row .btn{padding:11px 22px;font-size:14px;border-radius:12px}
+.hmini{font-size:11.5px;color:var(--ink-3)}
+.featgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:10px 0 26px}
+.fcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;box-shadow:var(--shadow-sm);transition:transform .18s ease,box-shadow .18s ease}
+.fcard:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.fi{color:var(--brand);margin-bottom:9px}
+.fi svg{width:20px;height:20px}
+.ft{font-weight:700;font-size:14.5px;margin-bottom:5px;letter-spacing:-.01em}
+.fd{font-size:12.5px;color:var(--ink-2);line-height:1.7}
+.aicard{background:linear-gradient(140deg,var(--brand-soft),var(--surface) 70%);border:1px solid var(--brand-soft-2);border-radius:var(--r-xl);padding:26px;margin:8px 0 22px}
+html[data-theme="dark"] .aicard{background:linear-gradient(140deg,rgba(47,191,164,.09),var(--surface) 70%)}
+.aicard h3{font-size:19px;font-weight:750;letter-spacing:-.02em;margin-bottom:8px}
+.aicard p{font-size:13px;color:var(--ink-2);line-height:1.8;margin-bottom:14px;max-width:660px}
+.provgrid{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+.pchip{font-size:11.5px;font-weight:600;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:5px 12px;cursor:pointer;transition:all .12s ease}
+.pchip:hover{border-color:var(--brand)}
+.pchip.loc{color:var(--brand-ink);border-color:var(--brand-soft-2);background:var(--brand-soft)}
+.pchip.sel{background:var(--brand);color:#fff;border-color:var(--brand)}
+.steps3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:8px}
+.sdot{width:26px;height:26px;border-radius:99px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;margin-bottom:10px}
+
 footer.site{padding:26px 18px 34px;font-size:11.5px;color:var(--ink-3);text-align:center;line-height:1.7}
 @media(min-width:920px){footer.site{padding-bottom:44px}}
 @media print{.dock,.side,.topbar,.no-print{display:none!important}main{padding:0}
@@ -370,7 +399,11 @@ footer.site{padding:26px 18px 34px;font-size:11.5px;color:var(--ink-3);text-alig
       </div>
       <div><div class="t1">选房谈判助手</div><div class="t2">Deal Coach</div></div>
     </div>
-    <button class="nav-item on" data-tab="board">
+    <button class="nav-item on" data-tab="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      首页
+    </button>
+    <button class="nav-item" data-tab="board">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
       房源看板<span class="grow" style="flex:1"></span><span class="pill plain" id="hcount" style="font-size:10px;padding:1px 8px"></span>
     </button>
@@ -410,7 +443,10 @@ footer.site{padding:26px 18px 34px;font-size:11.5px;color:var(--ink-3);text-alig
 </div>
 
 <nav class="dock" id="tabs">
-  <button data-tab="board" class="on">
+  <button data-tab="home" class="on">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    首页</button>
+  <button data-tab="board">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
     看板</button>
   <button data-tab="calc">
@@ -1111,62 +1147,6 @@ async function enableChromeAI(){
     }catch(e){ toast('下载未完成 —— '+(e.message||'').slice(0,60), false); }
   } else toast('浏览器内置 AI 状态:'+av, false);
 }
-/* AI 批注引擎:Ollama/自定义端点(OpenAI 兼容)→ 浏览器内置 AI → 提示配置 */
-async function aiAnnotate(id){
-  const p = getProp(id); if(!p) return;
-  const useChrome = !aiCfg.base && hasChromeAI();
-  if(!aiCfg.base && !useChrome && !aiCfg.key){ toast('未检测到可用 AI —— 本机 Ollama / 浏览器内置 AI / 云端 key 三选一,见「数据」页', false); return; }
-  const m = p.holdYears ? `持有计划:${p.holdYears}年(${holdType(p.holdYears)})` : '持有计划:未设定';
-  const body = {
-    name:p.name, addr:p.addr, listPrice:p.listPrice, m,
-    history:p.history, tiers:p.tiers, comps:(p.comps||[]).map(c=>({addr:c.addr,price:c.price,date:c.date,sqft:c.sqft})),
-    factors:(p.factors||[]).map(f=>f.s), checklistFlags:CHECKLIST.map((c,i)=>((p.checklist||{})[i]==='flag')?c[0]:null).filter(Boolean),
-    metrics:(()=>{ const mm=propMetrics(p); return {dom:mm.dom, cuts:mm.cuts, totalCutsPct:mm.totalCutsPct!=null?+mm.totalCutsPct.toFixed(1):null, relist:mm.relist}; })()
-  };
-  toast('AI 批注中' + (useChrome?'(浏览器内置 AI)':'') + '…');
-  let txt = '';
-  try{
-    if(useChrome){
-      const LM = chromeLM();
-      const av = await LM.availability();
-      if(av !== 'available'){
-        toast(av === 'downloadable'
-          ? '浏览器内置 AI 需一次性下载模型 —— 到「数据」页点「启用浏览器内置 AI」,之后永久免配置'
-          : '浏览器内置 AI 不可用('+av+')', false);
-        return;
-      }
-      const session = await LM.create({ initialPrompts:[{role:'system', content:AI_SYS}], temperature:0.3 });
-      txt = await session.prompt(JSON.stringify(body));
-      try{ session.destroy && session.destroy(); }catch(e){}
-    } else {
-      const base = (aiCfg.base||'https://api.openai.com/v1').replace(/\/+$/,'');
-      const ctrl = new AbortController(); const to = setTimeout(()=>ctrl.abort(), 60000);
-      const r = await fetch(base+'/chat/completions', {
-        method:'POST', signal:ctrl.signal,
-        headers:{'Content-Type':'application/json', ...(aiCfg.key?{Authorization:'Bearer '+aiCfg.key}:{})},
-        body: JSON.stringify({ model: aiCfg.model||'gpt-4o-mini', temperature:0.3,
-          messages:[{role:'system',content:AI_SYS},{role:'user',content:JSON.stringify(body)}] })
-      });
-      clearTimeout(to);
-      if(!r.ok) throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,120));
-      const j = await r.json();
-      txt = j.choices?.[0]?.message?.content || '';
-    }
-    txt = String(txt).replace(/^```(?:json)?/m,'').replace(/```\s*$/m,'').trim();
-    const a = JSON.parse(txt);
-    let n = 0;
-    if(Array.isArray(a.factors) && !p.factors) p.factors = zeroFactors();
-    (a.factors||[]).slice(0,7).forEach((f,i)=>{ if(p.factors[i] && !p.factors[i].note && f && f.note){ p.factors[i].note = String(f.note).slice(0,60); n++; } });
-    const parts = [];
-    if(a.advice) parts.push('💡 ' + a.advice);
-    if(Array.isArray(a.risks) && a.risks.length) parts.push('⚠ 额外风险:\n- ' + a.risks.map(x=>String(x).slice(0,80)).join('\n- '));
-    if(parts.length){ p.notes = '【AI 批注 ' + todayStr() + (useChrome?' · 浏览器内置':'') + '】\n' + parts.join('\n\n') + (p.notes?'\n\n'+p.notes:''); }
-    save(); renderSheet(id);
-    toast('AI 批注完成' + (n?`(补了 ${n} 条维度证据)`:''));
-  }catch(e){
-    toast('AI 批注失败 —— '+(e.message||'').slice(0,90), false);
-  }
-}
 async function maybeAutoAnnotate(id){
   if(!aiCfg.auto || (!aiReady() && !hasChromeAI())) return false;
   const p = getProp(id);
@@ -1274,6 +1254,7 @@ function renderReport(id){
   $('#sheet').innerHTML = `
     <div class="flex no-print" style="justify-content:space-between;margin-bottom:10px">
       <button class="btn ghost mini" onclick="renderSheet('${p.id}')">${IC.back} 返回编辑</button>
+      <button class="btn soft mini" onclick="aiDeepAnalysis('${p.id}')">${IC.star} AI 深度分析</button>
       <button class="btn mini" onclick="window.print()">${IC.print} 打印 / 存 PDF</button>
     </div>
     <div style="border-bottom:2.5px solid var(--ink);padding-bottom:12px;margin-bottom:16px">
@@ -1305,6 +1286,7 @@ function renderReport(id){
       <div class="note">贷款 ${usd(ex.price*(1-(p.downPct??10)/100))} @ 票面 ${p.rate}% · 月供本息 ${usd(ex.pi)} · 首付 ${usd(ex.down)}。持有期净成本 = 首付 + 全部月供 − 净回笼,可与同期租金及不同让步幅度下的进场价对照,用于评估持有期限与报价力度。</div>`:''}
       <div class="note">评分为结构化判断框架(每维 −2~+2),情景为规划假设,不构成价格预测。</div>
     </div>
+    ${p.aiAnalysis?aiAnalysisHtml(p.aiAnalysis):''}
     ${histRows?`<h2 class="sec">${IC.trend} 挂牌历史(议价证据)</h2>
     <div class="card">${p.history.filter(h=>h.price).length>=2?`<div class="mb">${spark(p.history,680,110,'r'+id)}</div>`:''}
     <table class="t"><thead><tr><th>日期</th><th>事件</th><th class="num">价格</th></tr></thead><tbody>${histRows}</tbody></table></div>`:''}
@@ -1670,24 +1652,20 @@ function renderData(){
       <b>③ 装成 App</b> —— 手机浏览器打开部署后的网址,iOS Safari「分享 → 添加到主屏幕」/ Android Chrome「安装应用」,以全屏 App 形式运行(已含 PWA manifest)。</p>
     </div>
     <div class="card mt">
-      <h2 class="sec" style="margin-top:0">${IC.star} AI 批注(可选)</h2>
-      <p class="muted mb" style="font-size:12.5px">数字类分析(阶梯/buydown/退出情景/调平)均在本地计算,不联网。AI 批注引擎按顺序自动选择:<b>① 本机 Ollama(自动探测)→ ② 浏览器内置 AI(Chrome/Edge 138+,零安装)→ ③ 下方手动配置的端点</b>。密钥仅存本机。</p>
-      <div class="flex mb" style="gap:8px">
-        <button class="btn ghost mini" onclick="enableChromeAI()">${IC.star} 启用/检查浏览器内置 AI</button>
-        <span class="muted" id="chrome-ai-status">检测中…</span>
+      <h2 class="sec" style="margin-top:0">${IC.star} AI 引擎 · 用你自己的 AI</h2>
+      <p class="muted mb" style="font-size:12.5px">数字类分析全部本地计算,不联网。AI 批注与深度分析在所选引擎上执行;密钥仅存本机,请求直连所选端点。未配置且本机有 Ollama 时自动启用。</p>
+      <div class="provgrid" id="provGrid">
+        ${AI_PROVIDERS.map(pr=>`<button type="button" class="pchip ${pr.local?'loc':''} ${aiCfg.provider===pr.id?'sel':''}" onclick="selectProvider('${pr.id}')">${pr.name}</button>`).join('')}
       </div>
-      <div class="row">
-        <div class="field" style="flex:2"><label class="f">API Base(OpenAI 兼容)</label><input id="ai-base" placeholder="https://api.openai.com/v1 或 http://localhost:11434/v1 (Ollama)" value="${esc(aiCfg.base||'')}"></div>
-        <div class="field" style="flex:2"><label class="f">API Key(本机 Ollama 可留空)</label><input id="ai-key" type="password" placeholder="sk-…(只存本机)" value=""></div>
-        <div class="field" style="flex:1"><label class="f">模型</label><input id="ai-model" placeholder="gpt-4o-mini" value="${esc(aiCfg.model||'')}"></div>
-      </div>
-      <div class="flex">
-        <button class="btn" onclick="saveAiUI()">${IC.check} 保存</button>
+      ${provDetailHtml()}
+      <div class="flex" style="margin-top:12px">
+        <button class="btn" onclick="saveAi()">${IC.check} 保存</button>
+        <button class="btn ghost" onclick="testAI()">${IC.check} 测试连接</button>
         <button class="btn ghost" onclick="detectLocalAI(true)">${IC.restore} 探测本机 Ollama</button>
-        <span class="muted" id="ai-status">${aiReady()?'已配置 ✓':'未配置 —— 若本机装有 Ollama,打开页面时会自动探测'}</span>
+        <span class="muted" id="ai-status">${aiCfg.provider?('当前引擎:'+provById(aiCfg.provider).name+(aiReady()?' ✓':' 待完善配置')):'未选择 —— 打开页面时自动探测本机 Ollama'}</span>
       </div>
-      <label class="flex" style="gap:7px;font-size:12.5px;margin-top:10px;cursor:pointer;user-select:none"><input type="checkbox" id="ai-auto" style="width:auto" ${aiCfg.auto!==false?'checked':''}><span>自动批注:数据充填完成或生成报告前,自动调用已配置的 AI 补充七维证据与建议(每房源一次)</span></label>
-      <div class="note">支持任意 OpenAI 兼容端点;本地部署可使用 Ollama(<code class="k">http://localhost:11434/v1</code>,模型如 <code class="k">qwen2.5:7b</code>)。<br>HTTPS 站点(如线上版)访问本机 Ollama 需一次性放行来源:macOS <code class="k">launchctl setenv OLLAMA_ORIGINS "*"</code> 后重启 Ollama;Windows <code class="k">setx OLLAMA_ORIGINS "*"</code> 后重启。Safari 可能拦截 https→localhost 请求,建议 Chrome/Edge 或本地运行本应用。</div>
+      <label class="flex" style="gap:7px;font-size:12.5px;margin-top:10px;cursor:pointer;user-select:none"><input type="checkbox" id="ai-auto" style="width:auto" ${aiCfg.auto!==false?'checked':''}><span>自动批注:数据充填完成或生成报告前,自动调用 AI 补充七维证据与建议(每房源一次)</span></label>
+      <div class="note">本机引擎(Ollama / LM Studio)免费;HTTPS 页面访问本机 Ollama 需一次性放行:macOS <code class="k">launchctl setenv OLLAMA_ORIGINS "*"</code> 后重启 Ollama,Windows <code class="k">setx OLLAMA_ORIGINS "*"</code>。Safari 拦截 https→localhost,建议 Chrome/Edge 或本地运行。云端引擎:密钥只存本机 localStorage,请求直连官方端点。</div>
     </div>
     <div class="card mt">
       <h2 class="sec" style="margin-top:0">${IC.star} 书签充填器</h2>
@@ -1729,19 +1707,60 @@ function renderData(){
     </div>`;
   updateChromeAIStatus();
 }
+function selectProvider(id){
+  aiCfg.provider = id; saveAiCfg(); renderData();
+}
+function provDetailHtml(){
+  const pr = provById(aiCfg.provider);
+  if(!pr) return '<div class="note">先在上方选择一个 AI 引擎;本机有 Ollama 时打开应用会自动选择。</div>';
+  if(pr.id==='chrome'){
+    return `<div class="flex" style="margin:10px 0"><button class="btn soft mini" onclick="enableChromeAI()">${IC.star} 启用/检查内置模型</button><span class="muted" id="chrome-ai-status">检测中…</span></div>
+    <div class="note">浏览器自带 Gemini Nano:零安装、免费、纯本机。首次启用由浏览器一次性下载模型并自动管理。</div>`;
+  }
+  const showBase = pr.id==='custom' || pr.id==='lmstudio';
+  return `<div class="row" style="margin-top:10px">
+    ${showBase?`<div class="field" style="flex:2"><label class="f">API Base</label><input id="ai-base" value="${esc(aiCfg.baseOverride!=null&&aiCfg.baseOverride!==''&&aiCfg.provider?aiCfg.baseOverride:(pr.base||''))}" placeholder="http://localhost:1234/v1"></div>`:''}
+    <div class="field" style="flex:2"><label class="f">API Key ${pr.local?'(本机无需)':'(仅存本机)'}</label><input id="ai-key" type="password" placeholder="${pr.local?'无需 key':'sk-… / api-…'}" value=""></div>
+    <div class="field" style="flex:2"><label class="f">模型</label><input id="ai-model" list="mdl" value="${esc((aiCfg.models&&aiCfg.models[pr.id])||'')}" placeholder="${(pr.models&&pr.models[0])||'如 gpt-4o-mini'}"><datalist id="mdl">${(pr.models||[]).map(m=>`<option value="${m}">`).join('')}</datalist></div>
+    ${pr.kind==='openai'?`<div class="field" style="flex:0 0 auto"><button type="button" class="btn ghost mini" style="margin-bottom:2px" onclick="fetchModels()">${IC.down} 获取模型列表</button></div>`:''}
+  </div>
+  ${pr.kind==='anthropic'?'<div class="note">Claude 直连需密钥可访问 API;本应用已带 browser 直连声明头,也可经 OpenRouter 调用。</div>':''}
+  ${pr.kind==='gemini'?'<div class="note">Gemini 使用 Google AI Studio 密钥(aiza 开头)。</div>':''}`;
+}
+async function fetchModels(){
+  const base = aiBase(); if(!base){ toast('先填写 API Base', false); return; }
+  try{
+    const key=(aiCfg.keys&&aiCfg.keys[aiCfg.provider])||($('#ai-key')?$('#ai-key').value.trim():'');
+    const r=await fetch(base+'/models',{headers:(key?{Authorization:'Bearer '+key}:{})});
+    const j=await r.json(); const ids=(j.data||[]).map(x=>x.id);
+    const dl=$('#mdl'); if(dl) dl.innerHTML = ids.map(m=>`<option value="${m}">`).join('');
+    toast('获取到 '+ids.length+' 个模型');
+  }catch(e){ toast('获取失败 —— '+(e.message||'').slice(0,60), false); }
+}
 function saveAi(){
-  const base=$('#ai-base'), key=$('#ai-key'), model=$('#ai-model');
-  if(base) updateChromeAIStatus();
-  if(!base) return;
-  aiCfg.base = base.value.trim() || null;
-  const k = key.value.trim();
-  if(k) aiCfg.key = k;               // 留空 = 保留旧 key
-  aiCfg.model = model.value.trim() || null;
-  const auto = $('#ai-auto');
+  const base=$('#ai-base'), key=$('#ai-key'), model=$('#ai-model'), auto=$('#ai-auto');
+  if(base){ const v=base.value.trim(); aiCfg.baseOverride = (v && v!==provById(aiCfg.provider).base)? v : null; }
+  if(key){ const k=key.value.trim(); if(k){ aiCfg.keys=aiCfg.keys||{}; aiCfg.keys[aiCfg.provider]=k; } }
+  if(model){ const m=model.value.trim(); aiCfg.models=aiCfg.models||{}; if(m) aiCfg.models[aiCfg.provider]=m; }
   if(auto) aiCfg.auto = auto.checked;
   saveAiCfg();
-  $('#ai-status').textContent = aiReady() ? '已配置 ✓' : '未配置 —— 若本机装有 Ollama,打开页面时会自动探测';
+  const st=$('#ai-status'); if(st) st.textContent = '当前引擎:'+provById(aiCfg.provider).name+(aiReady()?' ✓':' 待完善配置');
   toast('AI 配置已保存(仅存本机)');
+}
+async function testAI(){
+  saveAi();
+  let chain = aiCfg.provider? [aiCfg.provider] : [];
+  if(!chain.length){
+    if(await probeOllama()) chain.push('ollama');
+    if(hasChromeAI()) chain.push('chrome');
+  }
+  if(!chain.length){ toast('未检测到可用 AI', false); return; }
+  const t0=Date.now();
+  try{
+    const txt=await callAI('只输出 JSON', '{"ok":true}', chain[0], 20000);
+    const a=parseAIJson(txt);
+    toast(a&&a.ok? '连接成功 · '+provById(chain[0]).name+' ('+(Date.now()-t0)+'ms)' : '已连通,但输出格式异常 —— 建议换模型', !!(a&&a.ok));
+  }catch(e){ toast('连接失败 —— '+String(e.message||'').slice(0,80), false); }
 }
 function exportDb(){
   const blob = new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
@@ -1804,51 +1823,251 @@ function handleHashImport(){
   }
 }
 
-/* ---------------- 用户自带 AI(可选):叙述类批注走用户自己的 key / 本地模型 ---------------- */
-let aiCfg = (()=>{ try{ return JSON.parse(localStorage.getItem('hdc-ai'))||{}; }catch(e){ return {}; } })();
-function saveAiCfg(){ localStorage.setItem('hdc-ai', JSON.stringify(aiCfg)); }
-function aiReady(){ return !!aiCfg.base || !!aiCfg.key; }
-/* 自动探测本机 Ollama(仅未手动配置时);成功则自动启用 */
-async function detectLocalAI(manual){
-  if(!/^https?:$/.test(location.protocol)) return false;
+/* ================= AI 引擎:多 Provider · 本机探测 · 浏览器内置 · 全部用户自有 ================= */
+const AI_PROVIDERS = [
+  {id:'ollama',    name:'Ollama 本机',      kind:'openai',    base:'http://localhost:11434/v1', local:true, key:false, models:['qwen2.5:7b','qwen2.5:3b','llama3.2','mistral:latest']},
+  {id:'lmstudio',  name:'LM Studio 本机',   kind:'openai',    base:'http://localhost:1234/v1',  local:true, key:false, models:[]},
+  {id:'chrome',    name:'浏览器内置 AI',     kind:'chrome',    base:'',                          local:true, key:false, models:[]},
+  {id:'openai',    name:'OpenAI',           kind:'openai',    base:'https://api.openai.com/v1', models:['gpt-4o-mini','gpt-4o','gpt-4.1-mini']},
+  {id:'anthropic', name:'Anthropic Claude', kind:'anthropic', base:'https://api.anthropic.com/v1', models:['claude-sonnet-4-5','claude-haiku-4-5']},
+  {id:'gemini',    name:'Google Gemini',    kind:'gemini',    base:'https://generativelanguage.googleapis.com/v1beta', models:['gemini-2.5-flash','gemini-2.0-flash']},
+  {id:'deepseek',  name:'DeepSeek',         kind:'openai',    base:'https://api.deepseek.com/v1', models:['deepseek-chat','deepseek-reasoner']},
+  {id:'zhipu',     name:'智谱 GLM',         kind:'openai',    base:'https://open.bigmodel.cn/api/paas/v4', models:['glm-4.5-flash','glm-4-flash','glm-4-plus']},
+  {id:'moonshot',  name:'Moonshot Kimi',    kind:'openai',    base:'https://api.moonshot.cn/v1', models:['kimi-k2-turbo-preview','moonshot-v1-8k']},
+  {id:'qwen',      name:'阿里 Qwen',        kind:'openai',    base:'https://dashscope.aliyuncs.com/compatible-mode/v1', models:['qwen-plus','qwen-turbo','qwen-max']},
+  {id:'xai',       name:'xAI Grok',         kind:'openai',    base:'https://api.x.ai/v1', models:['grok-3-mini','grok-2-latest']},
+  {id:'groq',      name:'Groq',             kind:'openai',    base:'https://api.groq.com/openai/v1', models:['llama-3.3-70b-versatile']},
+  {id:'mistral',   name:'Mistral',          kind:'openai',    base:'https://api.mistral.ai/v1', models:['mistral-small-latest']},
+  {id:'openrouter',name:'OpenRouter',       kind:'openai',    base:'https://openrouter.ai/api/v1', models:['openai/gpt-4o-mini','anthropic/claude-3.5-haiku']},
+  {id:'custom',    name:'自定义 OpenAI 兼容', kind:'openai',   base:'', models:[]},
+];
+let aiCfg = (()=>{
   try{
-    const ctrl = new AbortController(); const to = setTimeout(()=>ctrl.abort(), 1800);
-    const r = await fetch('http://localhost:11434/v1/models', {signal: ctrl.signal});
-    clearTimeout(to);
-    const j = await r.json();
-    const ids = (j.data||[]).map(m=>m.id);
-    const prefer = ['qwen2.5:7b','qwen2.5:3b','qwen2.5-coder:7b','llama3.2','mistral:latest','gemma2'];
-    const model = prefer.find(p=>ids.includes(p)) || ids.find(i=>!/bge|embed/i.test(i));
-    if(!model) throw new Error('no model');
-    if(!aiCfg.base){
-      aiCfg.base = 'http://localhost:11434/v1'; aiCfg.model = model;
-      if(aiCfg.auto === undefined) aiCfg.auto = true;
-      saveAiCfg();
+    const c = JSON.parse(localStorage.getItem('hdc-ai'))||{};
+    if(c.base && !c.provider){
+      const m = AI_PROVIDERS.find(p=>p.base && c.base.startsWith(p.base));
+      c.provider = m ? m.id : 'custom';
+      c.keys = c.keys||{}; if(c.key) c.keys[c.provider]=c.key;
+      c.models = c.models||{}; if(c.model) c.models[c.provider]=c.model;
+      if(!m) c.baseOverride = c.base;
     }
-    if(manual) toast('已连接本机 Ollama:' + (aiCfg.model||model) + ' · AI 批注可用');
+    c.keys = c.keys||{}; c.models = c.models||{};
+    if(c.auto === undefined) c.auto = true;
+    return c;
+  }catch(e){ return {keys:{},models:{},auto:true}; }
+})();
+function saveAiCfg(){ localStorage.setItem('hdc-ai', JSON.stringify(aiCfg)); }
+function provById(id){ return AI_PROVIDERS.find(p=>p.id===id); }
+function aiBase(){ const pr=provById(aiCfg.provider); return (((aiCfg.baseOverride!=null&&aiCfg.baseOverride!=='')&&aiCfg.provider)?aiCfg.baseOverride:(pr&&pr.base)||'').replace(/\/+$/,''); }
+function aiModel(){ const pr=provById(aiCfg.provider); return (aiCfg.models&&aiCfg.models[aiCfg.provider]) || (pr&&pr.models&&pr.models[0]) || ''; }
+function aiReady(){
+  if(!aiCfg.provider) return false;
+  const pr = provById(aiCfg.provider); if(!pr) return false;
+  if(pr.id==='chrome') return hasChromeAI();
+  if(pr.local) return true;
+  if(pr.id==='custom') return !!aiBase() && !!(aiCfg.keys&&aiCfg.keys.custom);
+  return !!(aiCfg.keys&&aiCfg.keys[pr.id]);
+}
+let _ollama = null;
+async function probeOllama(){
+  if(_ollama) return _ollama;
+  if(!/^https?:$/.test(location.protocol)) return (_ollama=false);
+  try{
+    const c=new AbortController(); const t=setTimeout(()=>c.abort(),1800);
+    const r=await fetch('http://localhost:11434/v1/models',{signal:c.signal}); clearTimeout(t);
+    const j=await r.json(); const ids=(j.data||[]).map(x=>x.id).filter(i=>!/bge|embed/i.test(i));
+    _ollama = ids.length? ids : false;
+  }catch(e){ _ollama=false; }
+  return _ollama;
+}
+async function detectLocalAI(manual){
+  const ok = await probeOllama();
+  if(ok){
+    if(!aiCfg.provider){
+      const prefer=['qwen2.5:7b','qwen2.5:3b','qwen2.5-coder:7b','llama3.2','mistral:latest','gemma2'];
+      const model = prefer.find(m=>ok.includes(m)) || ok[0];
+      aiCfg.provider='ollama'; aiCfg.models.ollama=model;
+      saveAiCfg();
+      if(manual) toast('已连接本机 Ollama:'+model+' · AI 可用');
+    } else if(manual) toast('本机 Ollama 在运行(当前引擎:'+provById(aiCfg.provider).name+')');
     return true;
-  }catch(e){
-    if(manual) toast('未探测到本机 Ollama —— 见「数据」页 AI 配置卡说明', false);
-    return false;
   }
+  if(manual) toast('未探测到本机 Ollama —— 可用浏览器内置 AI,或在「数据」页配置', false);
+  return false;
+}
+async function callAI(sys, user, pid, timeoutMs){
+  const pr = provById(pid || aiCfg.provider);
+  if(!pr) throw new Error('未选择 AI 引擎');
+  const key = (aiCfg.keys&&aiCfg.keys[pr.id]) || '';
+  const base = ((aiCfg.baseOverride!=null&&aiCfg.baseOverride!=='')&&pr.id===aiCfg.provider?aiCfg.baseOverride:pr.base).replace(/\/+$/,'');
+  const model = (aiCfg.models&&aiCfg.models[pr.id]) || (pr.models&&pr.models[0]) || '';
+  const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(), timeoutMs||60000);
+  try{
+    if(pr.kind==='chrome'){
+      const LM=chromeLM(); if(!LM) throw new Error('此浏览器不支持内置 AI');
+      const av=await LM.availability();
+      if(av!=='available') throw new Error(av==='downloadable'?'内置模型待下载:「数据」页一键启用':'内置 AI 不可用('+av+')');
+      const sess=await LM.create({initialPrompts:[{role:'system',content:sys}],temperature:0.3});
+      const out=await sess.prompt(user); try{sess.destroy&&sess.destroy();}catch(e){}
+      return out;
+    }
+    if(pr.kind==='anthropic'){
+      const r=await fetch(base+'/messages',{method:'POST',signal:ctrl.signal,headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:1600,temperature:0.3,system:sys,messages:[{role:'user',content:user}]})});
+      if(!r.ok) throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,100));
+      const j=await r.json(); return (j.content||[]).map(c=>c.text||'').join('');
+    }
+    if(pr.kind==='gemini'){
+      const r=await fetch(base+'/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(key),{method:'POST',signal:ctrl.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:'user',parts:[{text:user}]}],generationConfig:{temperature:0.3}})});
+      if(!r.ok) throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,100));
+      const j=await r.json(); return (((j.candidates||[])[0]||{}).content?.parts||[]).map(p=>p.text||'').join('');
+    }
+    const r=await fetch(base+'/chat/completions',{method:'POST',signal:ctrl.signal,headers:{'Content-Type':'application/json',...(key?{Authorization:'Bearer '+key}:{})},body:JSON.stringify({model:model||'gpt-4o-mini',temperature:0.3,messages:[{role:'system',content:sys},{role:'user',content:user}]})});
+    if(!r.ok) throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,100));
+    const j=await r.json(); return j.choices?.[0]?.message?.content||'';
+  } finally { clearTimeout(to); }
+}
+function parseAIJson(txt){
+  try{
+    const s=String(txt).replace(/```(?:json)?/gi,'').trim();
+    const a=s.indexOf('{'), b=s.lastIndexOf('}');
+    if(a<0||b<=a) return null;
+    return JSON.parse(s.slice(a,b+1));
+  }catch(e){ return null; }
 }
 const AI_SYS = '你是严谨的购房谈判分析师。基于用户给的结构化数据,只输出 JSON(无其他文字、无代码块标记),格式:{"factors":[{"note":"≤25字的具体证据或判断"}共7个,顺序:学区,位置交通,房屋品质,同区供给,需求信号,利率敏感度,持有成本],"advice":"120字内:结合持有年限的谈判与买断建议","risks":["≤3条该房源特有的额外风险"]}';
+const AI_ANALYSIS_SYS = '你是购房谈判顾问。基于用户给的结构化数据,只输出 JSON(无其他文字、无代码块标记),格式:{"positioning":"定价水平判断:相对估值/同楼盘/邻近成交,80字内","strategy":"结合持有年限的出价与让步策略,130字内","payments":"推荐成交结构与月供安排,90字内","risks":["≤4条风险,每条≤30字"],"verdict":"一句话结论(买/等/放弃+条件)"}';
+function aiBody(p){
+  const m = p.holdYears ? `持有计划:${p.holdYears}年(${holdType(p.holdYears)})` : '持有计划:未设定';
+  return {
+    name:p.name, addr:p.addr, listPrice:p.listPrice, m,
+    history:p.history, tiers:p.tiers, comps:(p.comps||[]).map(c=>({addr:c.addr,price:c.price,date:c.date,sqft:c.sqft})),
+    factors:(p.factors||[]).map(f=>f.s), checklistFlags:CHECKLIST.map((c,i)=>((p.checklist||{})[i]==='flag')?c[0]:null).filter(Boolean),
+    metrics:(()=>{ const mm=propMetrics(p); return {dom:mm.dom, cuts:mm.cuts, totalCutsPct:mm.totalCutsPct!=null?+mm.totalCutsPct.toFixed(1):null, relist:mm.relist}; })()
+  };
+}
+async function aiAnnotate(id, quiet){
+  const p=getProp(id); if(!p) return;
+  let chain = aiCfg.provider? [aiCfg.provider] : [];
+  if(!chain.length){
+    if(await probeOllama()) chain.push('ollama');
+    if(hasChromeAI()) chain.push('chrome');
+  }
+  if(!chain.length){ if(!quiet) toast('未检测到可用 AI —— 本机 Ollama / 浏览器内置 / 云端 key 任配其一,见「数据」页', false); return; }
+  if(!quiet) toast('AI 批注中('+provById(chain[0]).name+')…');
+  let lastErr=null;
+  for(const pid of chain){
+    try{
+      const txt = await callAI(AI_SYS, JSON.stringify(aiBody(p)), pid);
+      const a = parseAIJson(txt);
+      if(!a) throw new Error('输出无法解析为 JSON');
+      let n=0;
+      if(Array.isArray(a.factors)){ if(!p.factors) p.factors=zeroFactors(); (a.factors||[]).slice(0,7).forEach((f,i)=>{ if(p.factors[i] && !p.factors[i].note && f && f.note){ p.factors[i].note=String(f.note).slice(0,60); n++; } }); }
+      const parts=[];
+      if(a.advice) parts.push('💡 '+a.advice);
+      if(Array.isArray(a.risks)&&a.risks.length) parts.push('⚠ 额外风险:\n- '+a.risks.map(x=>String(x).slice(0,80)).join('\n- '));
+      if(parts.length) p.notes='【AI 批注 '+todayStr()+' · '+provById(pid).name+'】\n'+parts.join('\n\n')+(p.notes?'\n\n'+p.notes:'');
+      save(); renderSheet(id);
+      toast('AI 批注完成 · '+provById(pid).name+(n?`(补 ${n} 条证据)`:''));
+      return;
+    }catch(e){ lastErr=e; }
+  }
+  if(!quiet) toast('AI 批注失败 —— '+String(lastErr&&lastErr.message||'').slice(0,90), false);
+}
+async function aiDeepAnalysis(id){
+  const p=getProp(id); if(!p) return;
+  let chain = aiCfg.provider? [aiCfg.provider] : [];
+  if(!chain.length){
+    if(await probeOllama()) chain.push('ollama');
+    if(hasChromeAI()) chain.push('chrome');
+  }
+  if(!chain.length){ toast('未检测到可用 AI —— 见「数据」页 AI 引擎配置', false); return; }
+  toast('AI 深度分析中('+provById(chain[0]).name+')…');
+  let lastErr=null;
+  for(const pid of chain){
+    try{
+      const extra = '补充背景:目标为4年持有期总成本最低(首付+全部支出-退出回收);让步形式价格优先(每$1降价=4年省$1.25)。';
+      const txt = await callAI(AI_ANALYSIS_SYS, JSON.stringify(aiBody(p))+'\n'+extra, pid);
+      const a = parseAIJson(txt);
+      if(!a || !a.verdict) throw new Error('输出无法解析为 JSON');
+      p.aiAnalysis = { date:todayStr(), provider:provById(pid).name,
+        positioning:String(a.positioning||''), strategy:String(a.strategy||''),
+        payments:String(a.payments||''), risks:Array.isArray(a.risks)?a.risks.slice(0,4).map(x=>String(x).slice(0,60)):[],
+        verdict:String(a.verdict||'') };
+      save(); renderReport(id);
+      toast('AI 深度分析完成 · '+provById(pid).name);
+      return;
+    }catch(e){ lastErr=e; }
+  }
+  toast('AI 深度分析失败 —— '+String(lastErr&&lastErr.message||'').slice(0,90), false);
+}
+function aiAnalysisHtml(a){
+  return `<h2 class="sec">${IC.star} AI 深度分析 <span class="n">${esc(a.provider)} · ${a.date}</span></h2>
+  <div class="card">
+    ${a.positioning?`<div class="kvrow"><span>定价定位</span><b style="max-width:70%;text-align:right;font-weight:550;font-size:12.5px">${esc(a.positioning)}</b></div>`:''}
+    ${a.strategy?`<div class="kvrow"><span>谈判策略</span><b style="max-width:70%;text-align:right;font-weight:550;font-size:12.5px">${esc(a.strategy)}</b></div>`:''}
+    ${a.payments?`<div class="kvrow"><span>成交与月供</span><b style="max-width:70%;text-align:right;font-weight:550;font-size:12.5px">${esc(a.payments)}</b></div>`:''}
+    ${a.risks&&a.risks.length?`<div class="kvrow"><span>风险提示</span><b style="max-width:70%;text-align:right;font-weight:550;font-size:12.5px;color:var(--warn)">${a.risks.map(esc).join(';')}</b></div>`:''}
+    ${a.verdict?`<div class="callout info mt"><span>${IC.target}</span><div><b>结论:</b>${esc(a.verdict)}</div></div>`:''}
+    <div class="note">由用户自有 AI 生成,属参考观点而非事实;与本地确定性计算(阶梯/月供/情景)互为补充。</div>
+  </div>`;
+}
+/* ================= 首页 ================= */
+function gotoTab(name){
+  tab = name;
+  $$('.nav-item[data-tab]').forEach(x=>x.classList.toggle('on',x.dataset.tab===name));
+  $$('.dock button').forEach(x=>x.classList.toggle('on',x.dataset.tab===name));
+  render(); window.scrollTo(0,0);
+}
+function renderHome(){
+  const n = db.properties.length;
+  const feats = [
+    [IC.trend,'挂牌历史与重挂检测','时间线录入每轮挂牌/降价/撤牌,自动算真实在售时长,识别换牌重挂'],
+    [IC.chev,'谈判阶梯与总让步','起报价→上限分档内部分档,credit 与总让步%自动计算,按持有期给偏好提示'],
+    [IC.clock,'Buydown 月供与调平','2-1 / 3-2-1 各年月供、缺口三方案调平、降价 vs credit 量化对比'],
+    [IC.gauge,'支撑分析与退出情景','七维房价支撑评分 + 三情景退出测算,回答该持有多久、该压多少'],
+    [IC.check,'尽调清单','出价前必问 13 项:MLS 完整历史、书面报价、HOA 财务、地税核定'],
+    [IC.print,'一键谈判报告','全部要素汇成可打印报告,打印 / 存 PDF 随身带去谈判'],
+  ];
+  $('#main').innerHTML = `
+  <div class="hero">
+    <span class="hbadge">${IC.home} 100% 本地计算 · 数据不出设备 · 免费开源</span>
+    <h1>买房谈判,<br><span class="hgrad">像专业买方一样出价</span></h1>
+    <p class="hsub">把挂牌历史、谈判阶梯、Buydown 月供、房价支撑与退出情景<br>装进一个零依赖的网页应用 —— 每一次出价都有数据支撑</p>
+    <div class="cta-row">
+      <button class="btn" onclick="gotoTab('board')">${IC.chev} 进入看板${n?`(${n} 套在追)`:''}</button>
+      <button class="btn ghost" onclick="gotoTab('data')">${IC.star} 配置我的 AI</button>
+    </div>
+    <div class="hmini">粘贴 Redfin / Zillow / Realtor 链接一键建档 · 书签充填器免抓取取数 · 支持安装为 App</div>
+  </div>
+  <div class="featgrid">
+    ${feats.map(f=>`<div class="fcard"><div class="fi">${f[0]}</div><div class="ft">${f[1]}</div><div class="fd">${f[2]}</div></div>`).join('')}
+  </div>
+  <div class="aicard">
+    <h3>用你自己的 AI 做分析</h3>
+    <p>所有数字分析在本机确定性计算。AI 批注与深度分析调用<b>你自己选择</b>的引擎 —— 本机模型免费,云端模型用你自己的 key;密钥仅存本机,请求直连所选端点,不经任何第三方。</p>
+    <div class="provgrid">${AI_PROVIDERS.map(pr=>`<span class="pchip ${pr.local?'loc':''}">${pr.name}</span>`).join('')}</div>
+    <button class="btn soft" onclick="gotoTab('data')">${IC.restore} 配置 AI 引擎</button>
+  </div>
+  <div class="steps3">
+    ${[['1','粘贴链接建档','Redfin / Zillow 链接或地址,回车即建档并带出来源'],
+       ['2','充填数据','书签充填器 / 粘贴解析 / 本机或云端 AI / 服务端 API'],
+       ['3','生成谈判报告','阶梯 · 月供 · 支撑分析 · 退出情景 · AI 批注,可打印']]
+    .map(s=>`<div class="fcard"><div class="sdot">${s[0]}</div><div class="ft">${s[1]}</div><div class="fd">${s[2]}</div></div>`).join('')}
+  </div>`;
+}
 
 /* ---------------- 导航 ---------------- */
-let tab = 'board';
+let tab = 'home';
 function render(){
   const n = db.properties.length;
   const hc=$('#hcount'), hcm=$('#hcount-m');
   if(hc) hc.textContent = n? n+' 套':'空';
   if(hcm) hcm.textContent = n? n+' 套在追':'空看板';
-  ({board:renderBoard, calc:renderCalc, play:renderPlay, data:renderData})[tab]();
+  ({home:renderHome, board:renderBoard, calc:renderCalc, play:renderPlay, data:renderData})[tab]();
 }
 $$('.nav-item[data-tab],.dock button').forEach(b=>b.addEventListener('click',()=>{
   if(!b.dataset.tab) return;
-  tab = b.dataset.tab;
-  $$('.nav-item[data-tab]').forEach(x=>x.classList.toggle('on',x.dataset.tab===tab));
-  $$('.dock button').forEach(x=>x.classList.toggle('on',x.dataset.tab===tab));
-  render();
+  gotoTab(b.dataset.tab);
 }));
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeProp(); });
 
