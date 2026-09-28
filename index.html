@@ -1720,7 +1720,7 @@ function provDetailHtml(){
   const showBase = pr.id==='custom' || pr.id==='lmstudio';
   return `<div class="row" style="margin-top:10px">
     ${showBase?`<div class="field" style="flex:2"><label class="f">API Base</label><input id="ai-base" value="${esc(aiCfg.baseOverride!=null&&aiCfg.baseOverride!==''&&aiCfg.provider?aiCfg.baseOverride:(pr.base||''))}" placeholder="http://localhost:1234/v1"></div>`:''}
-    <div class="field" style="flex:2"><label class="f">API Key ${pr.local?'(本机无需)':'(仅存本机)'}</label><input id="ai-key" type="password" placeholder="${pr.local?'无需 key':'sk-… / api-…'}" value=""></div>
+    <div class="field" style="flex:2"><label class="f">API Key ${pr.local?'(本机无需)':'(仅存本机)'}${(aiCfg.keys&&aiCfg.keys[pr.id])?' · <span style="color:var(--ok)">已保存 ✓</span>':''}</label><input id="ai-key" type="password" placeholder="${pr.local?'无需 key':((aiCfg.keys&&aiCfg.keys[pr.id])?'已保存 —— 输入新值可覆盖':'sk-… / api-…')}" value=""></div>
     <div class="field" style="flex:2"><label class="f">模型</label><input id="ai-model" list="mdl" value="${esc((aiCfg.models&&aiCfg.models[pr.id])||'')}" placeholder="${(pr.models&&pr.models[0])||'如 gpt-4o-mini'}"><datalist id="mdl">${(pr.models||[]).map(m=>`<option value="${m}">`).join('')}</datalist></div>
     ${pr.kind==='openai'?`<div class="field" style="flex:0 0 auto"><button type="button" class="btn ghost mini" style="margin-bottom:2px" onclick="fetchModels()">${IC.down} 获取模型列表</button></div>`:''}
   </div>
@@ -1738,29 +1738,43 @@ async function fetchModels(){
   }catch(e){ toast('获取失败 —— '+(e.message||'').slice(0,60), false); }
 }
 function saveAi(){
+  const pr = provById(aiCfg.provider);
+  if(!pr){ toast('请先选择 AI 引擎(或点「探测本机 Ollama」自动选择)', false); return false; }
   const base=$('#ai-base'), key=$('#ai-key'), model=$('#ai-model'), auto=$('#ai-auto');
-  if(base){ const v=base.value.trim(); aiCfg.baseOverride = (v && v!==provById(aiCfg.provider).base)? v : null; }
+  if(base){ const v=base.value.trim(); aiCfg.baseOverride = (v && v!==pr.base)? v : null; }
   if(key){ const k=key.value.trim(); if(k){ aiCfg.keys=aiCfg.keys||{}; aiCfg.keys[aiCfg.provider]=k; } }
   if(model){ const m=model.value.trim(); aiCfg.models=aiCfg.models||{}; if(m) aiCfg.models[aiCfg.provider]=m; }
   if(auto) aiCfg.auto = auto.checked;
   saveAiCfg();
-  const st=$('#ai-status'); if(st) st.textContent = '当前引擎:'+provById(aiCfg.provider).name+(aiReady()?' ✓':' 待完善配置');
+  const st=$('#ai-status'); if(st) st.textContent = '当前引擎:'+pr.name+(aiReady()?' ✓':' 待完善配置');
   toast('AI 配置已保存(仅存本机)');
+  return true;
 }
 async function testAI(){
-  saveAi();
-  let chain = aiCfg.provider? [aiCfg.provider] : [];
-  if(!chain.length){
-    if(await probeOllama()) chain.push('ollama');
-    if(hasChromeAI()) chain.push('chrome');
+  if(aiCfg.provider){ if(saveAi()===false) return; }
+  else{
+    const ok = await detectLocalAI(false);
+    if(!ok && hasChromeAI()){ aiCfg.provider='chrome'; saveAiCfg(); renderData(); return; }
+    if(!ok){ toast('未检测到可用 AI —— 选择引擎并填入 key,或在本机装 Ollama', false); return; }
   }
-  if(!chain.length){ toast('未检测到可用 AI', false); return; }
+  let chain = [aiCfg.provider];
   const t0=Date.now();
   try{
-    const txt=await callAI('只输出 JSON', '{"ok":true}', chain[0], 20000);
+    const txt=await callAI(' connectivity test. Reply with exactly this JSON and nothing else: {"ok":true}', 'ping', chain[0], 25000);
     const a=parseAIJson(txt);
-    toast(a&&a.ok? '连接成功 · '+provById(chain[0]).name+' ('+(Date.now()-t0)+'ms)' : '已连通,但输出格式异常 —— 建议换模型', !!(a&&a.ok));
-  }catch(e){ toast('连接失败 —— '+String(e.message||'').slice(0,80), false); }
+    toast(a? '连接成功 · '+provById(chain[0]).name+' ('+(Date.now()-t0)+'ms)' : (String(txt).trim()? '已连通 · '+provById(chain[0]).name+' ('+(Date.now()-t0)+'ms) — 输出非 JSON,分析功能仍可用' : '已连通但返回为空 —— 建议检查模型名', true));
+  }catch(e){
+    const m=String(e.message||''); let hint='';
+    if(/Failed to fetch|Load failed|NetworkError|TypeError/i.test(m)){
+      hint = /localhost|127\.0\.0\.1/i.test(aiBase())
+        ? ' —— 浏览器阻止 https→本机:用 Chrome 打开,或在本地运行本应用;Chrome 下需 OLLAMA_ORIGINS 放行并重启 Ollama'
+        : ' —— 已自动尝试服务器中转仍失败:检查网络/密钥';
+    }
+    else if(/HTTP 401|HTTP 403/i.test(m)) hint=' —— 密钥无效或无权限';
+    else if(/HTTP 404/i.test(m)) hint=' —— 端点或模型名不正确';
+    else if(/abort|time/i.test(m)) hint=' —— 超时(网络慢或端点不可达)';
+    toast('连接失败 —— '+m.slice(0,80)+hint, false);
+  }
 }
 function exportDb(){
   const blob = new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
@@ -1872,13 +1886,15 @@ let _ollama = null;
 async function probeOllama(){
   if(_ollama) return _ollama;
   if(!/^https?:$/.test(location.protocol)) return (_ollama=false);
-  try{
-    const c=new AbortController(); const t=setTimeout(()=>c.abort(),1800);
-    const r=await fetch('http://localhost:11434/v1/models',{signal:c.signal}); clearTimeout(t);
-    const j=await r.json(); const ids=(j.data||[]).map(x=>x.id).filter(i=>!/bge|embed/i.test(i));
-    _ollama = ids.length? ids : false;
-  }catch(e){ _ollama=false; }
-  return _ollama;
+  for(const host of ['http://127.0.0.1:11434','http://localhost:11434']){
+    try{
+      const c=new AbortController(); const t=setTimeout(()=>c.abort(),1500);
+      const r=await fetch(host+'/v1/models',{signal:c.signal}); clearTimeout(t);
+      const j=await r.json(); const ids=(j.data||[]).map(x=>x.id).filter(i=>!/bge|embed/i.test(i));
+      if(ids.length){ _ollama=ids; return _ollama; }
+    }catch(e){}
+  }
+  _ollama=false; return _ollama;
 }
 async function detectLocalAI(manual){
   const ok = await probeOllama();
@@ -1899,7 +1915,8 @@ async function callAI(sys, user, pid, timeoutMs){
   const pr = provById(pid || aiCfg.provider);
   if(!pr) throw new Error('未选择 AI 引擎');
   const key = (aiCfg.keys&&aiCfg.keys[pr.id]) || '';
-  const base = ((aiCfg.baseOverride!=null&&aiCfg.baseOverride!=='')&&pr.id===aiCfg.provider?aiCfg.baseOverride:pr.base).replace(/\/+$/,'');
+  let base = ((aiCfg.baseOverride!=null&&aiCfg.baseOverride!=='')&&pr.id===aiCfg.provider?aiCfg.baseOverride:pr.base).replace(/\/+$/,'');
+  if(pr.id==='ollama') base = base.replace('localhost','127.0.0.1');
   const model = (aiCfg.models&&aiCfg.models[pr.id]) || (pr.models&&pr.models[0]) || '';
   const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(), timeoutMs||60000);
   try{
@@ -1912,19 +1929,43 @@ async function callAI(sys, user, pid, timeoutMs){
       return out;
     }
     if(pr.kind==='anthropic'){
-      const r=await fetch(base+'/messages',{method:'POST',signal:ctrl.signal,headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:1600,temperature:0.3,system:sys,messages:[{role:'user',content:user}]})});
-      if(!r.ok) throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,100));
-      const j=await r.json(); return (j.content||[]).map(c=>c.text||'').join('');
+      try{
+        const r=await fetch(base+'/messages',{method:'POST',signal:ctrl.signal,headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:1600,temperature:0.3,system:sys,messages:[{role:'user',content:user}]})});
+        if(!r.ok) throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,100));
+        const j=await r.json(); return (j.content||[]).map(c=>c.text||'').join('');
+      }catch(e){
+        if(!(/^https:/.test(location.protocol)) || !((e instanceof TypeError) || /Failed to fetch|Load failed|NetworkError/i.test(e.message||''))) throw e;
+        return await relayAI({kind:'anthropic', base, model, key, system:sys, user});
+      }
     }
     if(pr.kind==='gemini'){
-      const r=await fetch(base+'/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(key),{method:'POST',signal:ctrl.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:'user',parts:[{text:user}]}],generationConfig:{temperature:0.3}})});
-      if(!r.ok) throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,100));
-      const j=await r.json(); return (((j.candidates||[])[0]||{}).content?.parts||[]).map(p=>p.text||'').join('');
+      try{
+        const r=await fetch(base+'/models/'+encodeURIComponent(model)+':generateContent?key='+encodeURIComponent(key),{method:'POST',signal:ctrl.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:'user',parts:[{text:user}]}],generationConfig:{temperature:0.3}})});
+        if(!r.ok) throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,100));
+        const j=await r.json(); return (((j.candidates||[])[0]||{}).content?.parts||[]).map(p=>p.text||'').join('');
+      }catch(e){
+        if(!(/^https:/.test(location.protocol)) || !((e instanceof TypeError) || /Failed to fetch|Load failed|NetworkError/i.test(e.message||''))) throw e;
+        return await relayAI({kind:'gemini', base, model, key, system:sys, user});
+      }
     }
-    const r=await fetch(base+'/chat/completions',{method:'POST',signal:ctrl.signal,headers:{'Content-Type':'application/json',...(key?{Authorization:'Bearer '+key}:{})},body:JSON.stringify({model:model||'gpt-4o-mini',temperature:0.3,messages:[{role:'system',content:sys},{role:'user',content:user}]})});
-    if(!r.ok) throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,100));
-    const j=await r.json(); return j.choices?.[0]?.message?.content||'';
+    try{
+      const r=await fetch(base+'/chat/completions',{method:'POST',signal:ctrl.signal,headers:{'Content-Type':'application/json',...(key?{Authorization:'Bearer '+key}:{})},body:JSON.stringify({model:model||'gpt-4o-mini',temperature:0.3,messages:[{role:'system',content:sys},{role:'user',content:user}]})});
+      if(!r.ok) throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,100));
+      const j=await r.json(); return j.choices?.[0]?.message?.content||'';
+    }catch(e){
+      if(!/^https:/.test(location.protocol)) throw e;
+      const netErr = (e instanceof TypeError) || /Failed to fetch|Load failed|NetworkError/i.test(e.message||'');
+      if(!netErr) throw e;
+      return await relayAI({kind:pr.kind, base, model, key, system:sys, user});
+    }
   } finally { clearTimeout(to); }
+}
+/* 服务器中转(部署版):解决云端厂商 CORS 与浏览器网络限制;密钥仍只存于用户浏览器,经其自有部署转发 */
+async function relayAI(payload){
+  const r=await fetch('api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const j=await r.json().catch(()=>null);
+  if(j && j.ok) return j.text;
+  throw new Error((j&&j.message) || '直连失败,且服务器中转不可用(需部署版;本地使用请用本机引擎)');
 }
 function parseAIJson(txt){
   try{
