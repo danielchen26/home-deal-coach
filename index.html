@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e0d">
+<title>选房谈判助手 · HomeDeal Coach</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+/* ============ Design tokens ============ */
+:root{
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --bg:#f3f5f2;
+  --bg-glow-1:rgba(13,148,126,.07);
+  --bg-glow-2:rgba(59,130,246,.05);
+  --surface:#ffffff;
+  --surface-2:#f7f9f7;
+  --surface-3:#eef1ee;
+  --ink:#15201b;
+  --ink-2:#57635d;
+  --ink-3:#8b968f;
+  --line:rgba(21,32,27,.09);
+  --line-strong:rgba(21,32,27,.16);
+  --brand:#0d8a76;
+  --brand-strong:#0a6f5f;
+  --brand-ink:#0b5f52;
+  --brand-soft:rgba(13,138,118,.10);
+  --brand-soft-2:rgba(13,138,118,.16);
+  --ok:#1a8a4f; --ok-soft:rgba(26,138,79,.12);
+  --warn:#a3690b; --warn-soft:rgba(163,105,11,.12);
+  --danger:#c13f3f; --danger-soft:rgba(193,63,63,.11);
+  --shadow-sm:0 1px 2px rgba(21,32,27,.05);
+  --shadow-md:0 2px 6px rgba(21,32,27,.05),0 12px 32px -16px rgba(21,32,27,.22);
+  --shadow-lg:0 24px 64px -24px rgba(21,32,27,.35);
+  --r-sm:10px; --r-md:14px; --r-lg:18px; --r-xl:24px;
+  --dock-bg:rgba(255,255,255,.82);
+}
+html[data-theme="dark"]{
+  --bg:#0a0e0d;
+  --bg-glow-1:rgba(45,212,191,.05);
+  --bg-glow-2:rgba(59,130,246,.04);
+  --surface:#12171510;
+  --surface:#131917;
+  --surface-2:#181f1c;
+  --surface-3:#1f2724;
+  --ink:#e9efeb;
+  --ink-2:#a3b0a9;
+  --ink-3:#6d7a73;
+  --line:rgba(233,239,235,.08);
+  --line-strong:rgba(233,239,235,.16);
+  --brand:#2fbfa4;
+  --brand-strong:#25a88b;
+  --brand-ink:#7ee0c8;
+  --brand-soft:rgba(47,191,164,.12);
+  --brand-soft-2:rgba(47,191,164,.20);
+  --ok:#4ade80; --ok-soft:rgba(74,222,128,.13);
+  --warn:#fbbf24; --warn-soft:rgba(251,191,36,.12);
+  --danger:#f87171; --danger-soft:rgba(248,113,113,.12);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+  --shadow-md:0 2px 6px rgba(0,0,0,.35),0 16px 40px -20px rgba(0,0,0,.6);
+  --shadow-lg:0 28px 72px -28px rgba(0,0,0,.8);
+  --dock-bg:rgba(19,25,23,.82);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  font-family:var(--font);background:var(--bg);color:var(--ink);
+  line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(600px 400px at 12% -4%,var(--bg-glow-1),transparent 60%),
+                   radial-gradient(700px 500px at 95% 0%,var(--bg-glow-2),transparent 55%);
+  background-attachment:fixed;
+  min-height:100vh;
+}
+::selection{background:var(--brand-soft-2)}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+button{font-family:inherit}
+
+/* ============ Layout ============ */
+.app{display:flex;min-height:100vh}
+.side{
+  display:none;position:sticky;top:0;height:100vh;width:228px;flex:0 0 228px;
+  padding:20px 14px;border-right:1px solid var(--line);
+  flex-direction:column;gap:4px;
+}
+@media(min-width:920px){ .side{display:flex} }
+.side .logo{display:flex;align-items:center;gap:10px;padding:6px 10px 18px}
+.side .logo .mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-strong));display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:var(--shadow-sm)}
+.side .logo .t1{font-weight:700;font-size:14.5px;letter-spacing:.2px}
+.side .logo .t2{font-size:10.5px;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);
+  border:none;background:none;color:var(--ink-2);font-size:13.5px;font-weight:550;
+  cursor:pointer;width:100%;text-align:left;transition:all .15s ease;position:relative;
+}
+.nav-item svg{width:17px;height:17px;flex:0 0 17px;opacity:.85}
+.nav-item:hover{background:var(--surface-2);color:var(--ink)}
+.nav-item.on{background:var(--brand-soft);color:var(--brand-ink);font-weight:650}
+html[data-theme="dark"] .nav-item.on{color:var(--brand-ink)}
+.side .grow{flex:1}
+.side .foot{padding:10px 12px;font-size:11px;color:var(--ink-3);line-height:1.6;border-top:1px solid var(--line)}
+.main-wrap{flex:1;min-width:0;display:flex;flex-direction:column}
+main{flex:1;width:100%;max-width:980px;margin:0 auto;padding:20px 18px 110px}
+@media(min-width:920px){ main{padding:34px 36px 60px} }
+
+/* topbar (mobile) */
+.topbar{
+  position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;
+  padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+  background:var(--dock-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+@media(min-width:920px){ .topbar{display:none} }
+.topbar .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-strong));display:flex;align-items:center;justify-content:center;color:#fff}
+.topbar .t{font-weight:700;font-size:15px;flex:1}
+.topbar .t small{display:block;font-size:10px;color:var(--ink-3);font-weight:500;letter-spacing:.06em}
+
+/* dock (mobile) */
+.dock{
+  position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(14px + env(safe-area-inset-bottom));z-index:60;
+  display:flex;gap:2px;padding:5px;border-radius:20px;
+  background:var(--dock-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--line-strong);box-shadow:var(--shadow-lg);
+}
+@media(min-width:920px){ .dock{display:none} }
+.dock button{
+  border:none;background:none;color:var(--ink-3);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-size:10px;font-weight:600;padding:7px 15px;border-radius:15px;transition:all .15s ease;
+  min-width:66px;
+}
+.dock button svg{width:20px;height:20px}
+.dock button.on{background:var(--brand);color:#fff;box-shadow:var(--shadow-sm)}
+
+/* ============ Primitives ============ */
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.page-head h1{font-size:24px;font-weight:750;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+@media(min-width:920px){ .page-head h1{font-size:28px} }
+.page-head .sub{font-size:12.5px;color:var(--ink-3);margin-top:3px}
+h2.sec{
+  font-size:13px;font-weight:650;color:var(--ink-2);
+  margin:28px 0 12px;display:flex;align-items:center;gap:8px;
+  text-transform:uppercase;letter-spacing:.07em;
+}
+h2.sec:first-child{margin-top:0}
+h2.sec .n{font-size:11px;color:var(--ink-3);font-weight:500;text-transform:none;letter-spacing:0}
+h2.sec svg{width:15px;height:15px;color:var(--brand)}
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:var(--shadow-sm);padding:18px;transition:box-shadow .2s ease,transform .15s ease;
+}
+.card.hoverable:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:1fr}
+@media(min-width:760px){.g2{grid-template-columns:1fr 1fr}}
+.g3{grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}
+.btn{
+  display:inline-flex;align-items:center;gap:7px;justify-content:center;
+  background:var(--brand);color:#fff;border:none;border-radius:var(--r-sm);
+  padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;
+  transition:all .15s ease;box-shadow:var(--shadow-sm);
+}
+.btn svg{width:15px;height:15px}
+.btn:hover{background:var(--brand-strong);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.btn:active{transform:translateY(0)}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line-strong);box-shadow:none}
+.btn.ghost:hover{background:var(--surface-2);border-color:var(--ink-3)}
+.btn.soft{background:var(--brand-soft);color:var(--brand-ink);box-shadow:none}
+html[data-theme="dark"] .btn.soft{color:var(--brand-ink)}
+.btn.soft:hover{background:var(--brand-soft-2)}
+.btn.danger{background:none;color:var(--danger);border:1px solid transparent;box-shadow:none}
+.btn.danger:hover{background:var(--danger-soft);border-color:var(--danger-soft)}
+.btn.mini{padding:5px 10px;font-size:12px;border-radius:8px}
+.btn.mini svg{width:13px;height:13px}
+.btn.block{width:100%}
+.icon-btn{
+  border:none;background:none;color:var(--ink-3);cursor:pointer;padding:7px;border-radius:9px;
+  display:inline-flex;transition:all .15s ease;
+}
+.icon-btn:hover{background:var(--surface-2);color:var(--ink)}
+.icon-btn svg{width:17px;height:17px}
+input,select,textarea{
+  font-family:inherit;font-size:13.5px;color:var(--ink);
+  background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:9px 11px;width:100%;transition:border-color .15s ease,box-shadow .15s ease;
+}
+html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea{background:var(--surface-3)}
+input::placeholder,textarea::placeholder{color:var(--ink-3)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+label.f{display:block;font-size:11.5px;color:var(--ink-2);margin-bottom:5px;font-weight:600;letter-spacing:.02em}
+.field{margin-bottom:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.row>*{flex:1;min-width:128px}
+.pill{
+  display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;
+  border-radius:99px;font-weight:650;white-space:nowrap;letter-spacing:.02em;
+}
+.pill svg{width:11px;height:11px}
+.pill.dd{background:var(--warn-soft);color:var(--warn)}
+.pill.live{background:var(--ok-soft);color:var(--ok)}
+.pill.off{background:var(--surface-3);color:var(--ink-3)}
+.pill.offer{background:var(--brand-soft);color:var(--brand-ink)}
+html[data-theme="dark"] .pill.offer{color:var(--brand-ink)}
+.pill.deal{background:var(--brand);color:#fff}
+.pill.flag{background:var(--danger-soft);color:var(--danger)}
+.pill.plain{background:var(--surface-2);color:var(--ink-2);font-weight:550}
+.flex{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.muted{color:var(--ink-3);font-size:12px}
+.mt{margin-top:12px}.mb{margin-bottom:12px}
+.note{font-size:12px;color:var(--ink-3);margin-top:10px;line-height:1.65}
+.note b{color:var(--ink-2)}
+.callout{border-radius:var(--r-md);padding:11px 13px;font-size:12.5px;line-height:1.6;margin-top:10px;display:flex;gap:9px}
+.callout svg{width:15px;height:15px;flex:0 0 15px;margin-top:2px}
+.callout.warn{background:var(--warn-soft);color:var(--warn)}
+.callout.info{background:var(--brand-soft);color:var(--brand-ink)}
+html[data-theme="dark"] .callout.info{color:var(--brand-ink)}
+.empty{text-align:center;padding:52px 16px;color:var(--ink-3)}
+.empty svg{width:44px;height:44px;margin-bottom:12px;opacity:.4}
+.empty .t{font-size:14.5px;font-weight:600;color:var(--ink-2);margin-bottom:4px}
+code.k{background:var(--surface-3);border-radius:6px;padding:1px 7px;font-size:11.5px;font-variant-numeric:tabular-nums}
+
+/* ============ Tables ============ */
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th{
+  font-size:10.5px;color:var(--ink-3);text-align:left;font-weight:650;
+  padding:8px 8px;border-bottom:1px solid var(--line-strong);
+  white-space:nowrap;text-transform:uppercase;letter-spacing:.06em;
+}
+table.t td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.t tr:last-child td{border-bottom:none}
+table.t td.num,table.t th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.t input{padding:6px 9px;font-size:12.5px;background:transparent;border-color:transparent}
+table.t input:hover{border-color:var(--line-strong)}
+table.t input:focus{background:var(--surface-2)}
+.cbar{width:64px;height:5px;border-radius:99px;background:var(--surface-3);overflow:hidden;margin-left:8px;display:inline-block;vertical-align:middle}
+.cbar i{display:block;height:100%;background:var(--brand);border-radius:99px}
+.cbar.hot i{background:var(--ok)}
+.fbtn{width:32px;height:26px;border-radius:7px;border:1px solid var(--line);background:var(--surface);font-size:12px;font-weight:650;color:var(--ink-3);cursor:pointer;transition:all .12s ease;font-variant-numeric:tabular-nums}
+.fbtn:hover{border-color:var(--ink-3)}
+.fbtn.on.v2{background:var(--ok);color:#fff;border-color:var(--ok)}
+.fbtn.on.v1{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.fbtn.on.v0{background:var(--surface-3);color:var(--ink-2);border-color:var(--line-strong)}
+.fbtn.on.vm1{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.fbtn.on.vm2{background:var(--danger);color:#fff;border-color:var(--danger)}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:var(--shadow-lg);opacity:0;transition:all .25s ease;z-index:200;max-width:86vw;text-align:center;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ============ Board ============ */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;box-shadow:var(--shadow-sm)}
+.stat .lbl{font-size:11px;color:var(--ink-3);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.stat .lbl svg{width:13px;height:13px}
+.stat .val{font-size:23px;font-weight:750;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat .val small{font-size:12px;color:var(--ink-3);font-weight:500}
+.pcard{cursor:pointer;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.pcard:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.pcard .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.pcard .name{font-size:15px;font-weight:700;letter-spacing:-.01em;line-height:1.35}
+.pcard .addr{font-size:12px;color:var(--ink-3);margin-top:2px}
+.pcard .priceline{display:flex;align-items:baseline;gap:9px;margin:13px 0 4px;flex-wrap:wrap}
+.pcard .price{font-size:23px;font-weight:750;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.pcard .was{font-size:12.5px;color:var(--ink-3);text-decoration:line-through}
+.pcard .spark{margin:6px -4px 10px}
+.pcard .stats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.pcard .stat-chip{font-size:11.5px;color:var(--ink-2);background:var(--surface-2);border-radius:8px;padding:3px 9px;font-variant-numeric:tabular-nums;display:inline-flex;align-items:center;gap:5px}
+.pcard .stat-chip svg{width:12px;height:12px;flex:0 0 12px;opacity:.75}
+.pcard .stat-chip b{font-weight:650;color:var(--ink)}
+.pcard .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid var(--line);padding-top:12px;margin-top:auto}
+.progress{height:5px;background:var(--surface-3);border-radius:99px;overflow:hidden;flex:1;min-width:70px}
+.progress i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .3s ease}
+
+/* ============ Sheet(居中弹窗) ============ */
+.overlay{position:fixed;inset:0;z-index:100;background:rgba(8,12,10,.5);display:flex;backdrop-filter:blur(3px);padding:20px 14px;overflow-y:auto}
+.sheet{
+  background:var(--bg);width:100%;max-width:800px;margin:auto;
+  border-radius:var(--r-lg);border:1px solid var(--line);
+  box-shadow:var(--shadow-lg);padding:16px 18px 60px;
+  animation:popIn .2s cubic-bezier(.32,.72,.24,1);
+}
+@keyframes popIn{from{transform:scale(.975) translateY(8px);opacity:0}to{transform:none;opacity:1}}
+@media(max-width:640px){
+  .overlay{padding:0}
+  .sheet{border-radius:0;border:none;min-height:100dvh;padding:12px 14px 70px}
+}
+.sheet .shead{position:sticky;top:0;background:var(--bg);padding:8px 0 14px;z-index:5;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.sheet .shead h3{font-size:17.5px;font-weight:750;letter-spacing:-.01em;flex:1;line-height:1.3}
+.tier-opener td{background:var(--brand-soft)}
+.check-item{display:flex;gap:11px;align-items:flex-start;padding:11px 4px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .12s ease;border-radius:8px}
+.check-item:hover{background:var(--surface-2)}
+.check-item:last-child{border-bottom:none}
+.check-item .box{
+  flex:0 0 19px;height:19px;border-radius:6px;border:1.5px solid var(--line-strong);margin-top:1px;
+  display:flex;align-items:center;justify-content:center;color:#fff;background:var(--surface);transition:all .15s ease;
+}
+.check-item .box svg{width:11px;height:11px;opacity:0}
+.check-item[data-st="ok"] .box{background:var(--ok);border-color:var(--ok)}
+.check-item[data-st="ok"] .box svg{opacity:1}
+.check-item[data-st="ok"] .txt{color:var(--ink-2)}
+.check-item[data-st="flag"] .box{background:var(--danger);border-color:var(--danger)}
+.check-item[data-st="flag"] .box svg{opacity:1}
+.check-item .txt{font-size:13px;font-weight:550}
+.check-item .sub{font-size:11.5px;color:var(--ink-3);margin-top:1px;line-height:1.55}
+.check-item[data-st="flag"] .txt{color:var(--danger)}
+
+/* ============ Playbook ============ */
+.play{counter-reset:rule;display:grid;gap:0}
+.play .rule{display:flex;gap:13px;padding:13px 2px;border-bottom:1px solid var(--line)}
+.play .rule:last-child{border-bottom:none}
+.play .rule::before{
+  counter-increment:rule;content:counter(rule,decimal-leading-zero);
+  flex:0 0 32px;height:32px;border-radius:10px;background:var(--brand-soft);color:var(--brand-ink);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;font-variant-numeric:tabular-nums;
+}
+html[data-theme="dark"] .play .rule::before{color:var(--brand-ink)}
+.play .rule .rt{font-weight:650;font-size:13.5px;margin-bottom:2px;letter-spacing:-.01em}
+.play .rule .rd{font-size:12.5px;color:var(--ink-2);line-height:1.65}
+.flow{display:flex;flex-direction:column;gap:0}
+.flow .step{display:flex;align-items:center;gap:12px;padding:10px 2px}
+.flow .step .dot{flex:0 0 26px;height:26px;border-radius:99px;background:var(--surface-3);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.flow .step:not(:last-child)::after{content:'';position:absolute}
+.flow .connector{width:1.5px;height:10px;background:var(--line-strong);margin-left:12.75px}
+
+/* ============ Calculator ============ */
+.seg{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:3px;gap:2px}
+.seg button{
+  flex:1;border:none;background:none;padding:7px 10px;border-radius:8px;font-size:12.5px;font-weight:600;
+  color:var(--ink-2);cursor:pointer;transition:all .15s ease;white-space:nowrap;
+}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm)}
+html[data-theme="dark"] .seg button.on{background:var(--surface-3)}
+.calc-hero{
+  border-radius:var(--r-lg);padding:18px;margin-top:14px;
+  background:linear-gradient(150deg,var(--brand-soft-2),var(--brand-soft) 55%,transparent 140%);
+  border:1px solid var(--brand-soft-2);
+}
+html[data-theme="dark"] .calc-hero{border:1px solid rgba(47,191,164,.25)}
+.calc-hero .lbl{font-size:11px;color:var(--brand-ink);opacity:.75;font-weight:650;letter-spacing:.05em;text-transform:uppercase}
+html[data-theme="dark"] .calc-hero .lbl{color:var(--brand-ink)}
+.calc-hero .big{font-size:27px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.2}
+.years{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:13px}
+@media(max-width:560px){.years{grid-template-columns:1fr}}
+.ycard{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:11px 13px;position:relative;
+}
+.ycard.sub{border-color:var(--brand-soft-2);background:linear-gradient(160deg,var(--brand-soft),var(--surface) 70%)}
+.ycard .yl{font-size:10.5px;color:var(--ink-3);font-weight:650;text-transform:uppercase;letter-spacing:.05em;display:flex;justify-content:space-between;align-items:center}
+.ycard .yr{font-size:11px;color:var(--brand-ink);font-weight:650}
+html[data-theme="dark"] .ycard .yr{color:var(--brand-ink)}
+.ycard .pi{font-size:17px;font-weight:750;font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin-top:2px}
+.ycard .ai{font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;margin-top:1px}
+.kvrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}
+.kvrow:last-child{border-bottom:none}
+.kvrow b{font-variant-numeric:tabular-nums;font-weight:650}
+
+footer.site{padding:26px 18px 34px;font-size:11.5px;color:var(--ink-3);text-align:center;line-height:1.7}
+@media(min-width:920px){footer.site{padding-bottom:44px}}
+@media print{.dock,.side,.topbar,.no-print{display:none!important}main{padding:0}
+  .overlay{position:static;display:block;background:none;backdrop-filter:none}
+  .sheet{width:100%;max-width:none;box-shadow:none;padding:0;animation:none;background:#fff;color:#000}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="logo">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div><div class="t1">选房谈判助手</div><div class="t2">Deal Coach</div></div>
+    </div>
+    <button class="nav-item on" data-tab="board">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+      房源看板<span class="grow" style="flex:1"></span><span class="pill plain" id="hcount" style="font-size:10px;padding:1px 8px"></span>
+    </button>
+    <button class="nav-item" data-tab="calc">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6.5" x2="16" y2="6.5"/><line x1="16" y1="12" x2="16.01" y2="12"/><line x1="12" y1="12" x2="12.01" y2="12"/><line x1="8" y1="12" x2="8.01" y2="12"/><line x1="16" y1="16.5" x2="16.01" y2="16.5"/><line x1="12" y1="16.5" x2="12.01" y2="16.5"/><line x1="8" y1="16.5" x2="8.01" y2="16.5"/></svg>
+      计算器
+    </button>
+    <button class="nav-item" data-tab="play">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      谈价守则
+    </button>
+    <button class="nav-item" data-tab="data">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+      数据
+    </button>
+    <div class="grow"></div>
+    <button class="nav-item" id="themeBtn-side">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <span id="themeLabel-side">外观</span>
+    </button>
+    <div class="foot">数据仅存于本机浏览器<br>计算为谈判规划参考,非估值或贷款建议</div>
+  </aside>
+
+  <div class="main-wrap">
+    <div class="topbar">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div class="t">选房谈判助手<small>DEAL COACH · <span id="hcount-m"></span></small></div>
+      <button class="icon-btn" id="themeBtn-top"></button>
+    </div>
+
+    <main id="main"></main>
+
+    <footer class="site">选房谈判助手 · 数据仅存于本机(localStorage),不上传服务器<br>计算结果为谈判规划参考,不构成估值、贷款承诺或投资建议</footer>
+  </div>
+</div>
+
+<nav class="dock" id="tabs">
+  <button data-tab="board" class="on">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+    看板</button>
+  <button data-tab="calc">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6.5" x2="16" y2="6.5"/><line x1="16" y1="12" x2="16.01" y2="12"/><line x1="12" y1="12" x2="12.01" y2="12"/><line x1="8" y1="12" x2="8.01" y2="12"/><line x1="16" y1="16.5" x2="16.01" y2="16.5"/><line x1="12" y1="16.5" x2="12.01" y2="16.5"/><line x1="8" y1="16.5" x2="8.01" y2="16.5"/></svg>
+    计算器</button>
+  <button data-tab="play">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    守则</button>
+  <button data-tab="data">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+    数据</button>
+</nav>
+
+<div class="overlay" id="overlay" style="display:none">
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script>
+'use strict';
+
+/* ---------------- 工具 ---------------- */
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const usd = v => (v==null||isNaN(v)) ? '—' :
+  new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v);
+const pct1 = v => (v==null||isNaN(v)) ? '—' : (v>0?'+':'')+v.toFixed(1)+'%';
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const todayStr = () => new Date().toISOString().slice(0,10);
+const daysBetween = (a,b) => Math.round((new Date(b)-new Date(a))/864e5);
+function toast(msg, ok=true){
+  const t = document.createElement('div');
+  t.className = 'toast';
+  if(!ok) t.style.background = 'var(--danger)';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>t.classList.add('show'));
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 300); }, 2800);
+}
+const IC = { // 线性图标
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
+  sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>',
+  moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  alert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  trend:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  restore:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+  target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+  scale:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 7 3 13a3 3 0 0 0 6 0L7 7"/><path d="M19 7l-2 6a3 3 0 0 0 6 0l-2-6"/></svg>',
+  print:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>',
+  gauge:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 1 1 9-9"/><path d="M12 12l5-3"/><path d="M21 12a9 9 0 0 1-9 9"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>',
+};
+
+/* ---------------- 主题 ---------------- */
+const THEME_KEY='hdc-theme';
+function applyTheme(t){
+  document.documentElement.dataset.theme=t;
+  const lbl = t==='dark'?'浅色模式':'深色模式';
+  const s=$('#themeLabel-side'); if(s) s.textContent=lbl;
+  const top=$('#themeBtn-top'); if(top) top.innerHTML = t==='dark'?IC.sun:IC.moon;
+  const side=$('#themeBtn-side');
+  if(side) side.querySelector('svg').outerHTML = t==='dark'?IC.sun:IC.moon;
+  const mt=document.querySelector('meta[name=theme-color]'); if(mt) mt.content = t==='dark'?'#0a0e0d':'#f3f5f2';
+}
+let theme = localStorage.getItem(THEME_KEY) || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+applyTheme(theme);
+function toggleTheme(){ theme = theme==='dark'?'light':'dark'; localStorage.setItem(THEME_KEY,theme); applyTheme(theme); }
+$('#themeBtn-side').addEventListener('click',e=>{ if(e.target.closest('.nav-item')&&!e.target.closest('#themeBtn-side'))return; toggleTheme(); });
+$('#themeBtn-top').addEventListener('click',toggleTheme);
+
+/* ---------------- 计算 ---------------- */
+function pmt(principal, annualRatePct, years){ // 等额本息月供
+  const r = annualRatePct/100/12, n = years*12;
+  if(principal<=0) return 0;
+  if(r<=0) return principal/n;
+  const f = Math.pow(1+r,n);
+  return principal*r*f/(f-1);
+}
+/* 临时性 buydown:第 k 年按 (票面利率-当年补贴点数) 全期重算月供(规划近似) */
+function buydownSchedule(loan, noteRate, years, type){
+  const offsets = {'none':[], '2-1':[2,1], '3-2-1':[3,2,1]}[type] || [];
+  const base = pmt(loan, noteRate, years);
+  const years_ = [];
+  let fund = 0;
+  const show = Math.max(3, offsets.length + 1);
+  for(let y=1; y<=show; y++){
+    const off = offsets[y-1] || 0;
+    const pay = off>0 ? pmt(loan, Math.max(0.0001, noteRate-off), years) : base;
+    if(off>0) fund += (base-pay)*12;
+    years_.push({year:y, rate:noteRate-off, pi:pay, subsidized:off>0});
+  }
+  return {base, years:years_, fund};
+}
+function concession(listPrice, offer, creditPct){
+  const credit = offer*creditPct/100;
+  const sellerNet = offer-credit;
+  return {credit, sellerNet, pct:(listPrice-sellerNet)/listPrice*100};
+}
+/* 挂牌价格走势迷你图(步进折线) */
+function spark(hist, w, h, uid){
+  const pts = hist.filter(x=>x.price && x.date).slice().sort((a,b)=>a.date<b.date?-1:1);
+  if(pts.length<2) return '';
+  const pad=6, ph=14;
+  const xs = pts.map((p,i)=> pts.length===1 ? w/2 : pad + i*(w-2*pad)/(pts.length-1));
+  const prices = pts.map(p=>p.price);
+  const lo = Math.min(...prices), hi = Math.max(...prices);
+  const ys = prices.map(v => hi===lo ? h/2 : pad + (hi-v)*(h-2*pad)/(hi-lo));
+  let d = `M ${xs[0].toFixed(1)} ${ys[0].toFixed(1)}`;
+  for(let i=1;i<pts.length;i++) d += ` L ${xs[i].toFixed(1)} ${ys[i-1].toFixed(1)} L ${xs[i].toFixed(1)} ${ys[i].toFixed(1)}`;
+  const area = d + ` L ${xs[xs.length-1].toFixed(1)} ${h-pad} L ${xs[0].toFixed(1)} ${h-pad} Z`;
+  const dots = pts.map((p,i)=>`<circle cx="${xs[i].toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${i===pts.length-1?3.4:2.6}" fill="var(--brand)" stroke="var(--surface)" stroke-width="1.5"/>`).join('');
+  const lastTxt = `<text x="${Math.min(xs[xs.length-1], w-4).toFixed(1)}" y="${Math.max(10, ys[ys.length-1]-7).toFixed(1)}" text-anchor="end" font-size="10.5" font-weight="700" fill="var(--brand)" font-family="inherit">${(prices[prices.length-1]/1000).toFixed(0)}k</text>`;
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:${h}px;display:block" preserveAspectRatio="none">
+    <defs><linearGradient id="sg${uid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="var(--brand)" stop-opacity=".22"/><stop offset="1" stop-color="var(--brand)" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="${area}" fill="url(#sg${uid})"/><path d="${d}" fill="none" stroke="var(--brand)" stroke-width="2" stroke-linejoin="round"/>${dots}${lastTxt}</svg>`;
+}
+
+/* ---------------- 数据 ---------------- */
+const LS_KEY = 'hdc-db-v1';
+const CHECKLIST = [
+  ['先问自己:这套房打算住几年?','短期(≤5年)目标是持有期现金流与退出流动性;长期(≥10年)目标是票面利率月供与总利息——目标函数不同,谈判与贷款策略都不同。'],
+  ['调出完整 MLS 历史','是否换地址/换牌重新挂牌、撤牌原因、有没有签约后又退出的买家。看房人数 ≠ 报价数量。'],
+  ['目前有无书面报价','有没有正在谈的买家?有几个?口头热度不算数。'],
+  ['卖方的交割时间偏好','不要假设开发商急着回款。找出真实时间需求,交割日期本身就是谈判筹码。'],
+  ['同项目其他单元成交情况','兄弟单元的成交价、credit、户型差异,比跨街区参考更有分量。'],
+  ['施工范围与许可','改建/翻新的施工范围、许可证与验收记录、保修文件。"新房年份"≠全新结构。'],
+  ['Condo 财务与 HOA','预算、储备金、保险免赔额、会议记录、计划中的大修;HOA fee 是确定值还是估算。'],
+  ['地税是否已核定','新改建/新建房产的地税常未核定,网站月供计算不可直接采信。'],
+  ['车位/院子/露台权属','车库、车道、院子的使用权文件;屋顶露台的防水与维修责任在业主还是 HOA。'],
+  ['贷款可融资性','两户/三户 condo、非标项目可能有融资限制,先让 lender 确认可贷。'],
+  ['真实预批函 + 资金证明','低价 offer 必须配交割可信度,否则卖方不会认真对待。'],
+  ['同街区已成交参考','收集 3 个左右可对比成交(同类型/同期/同项目优先),调整差异后再用。'],
+  ['月供按票面利率复核','补贴结束后的完整月供(本息+税+HOA+保险+PMI)必须自己长期负担得起。'],
+];
+const STATUSES = [
+  ['尽调中','dd'],['已出价','offer'],['谈判中','live'],['已成交','deal'],['已放弃','off']
+];
+/* 房价支撑七维:评分 -2~+2,合计即支撑指数 */
+const FACTORS = [
+  ['school','学区质量','强学区 = 跨周期需求底盘,下行期最先失守的是弱学区'],
+  ['transit','位置与交通','通勤铁路/地铁/步行分——位置不可复制'],
+  ['quality','房屋品质','新建/翻新深度、结构年龄、持有期维护负担'],
+  ['supply','同区供给','同楼盘在售单元、周边新盘——退出时的直接对手'],
+  ['demand','需求信号','在售天数、浏览/收藏比、降价轨迹'],
+  ['rate','利率敏感度','高月供门槛压缩买方池;buydown 到期是否需要再融资'],
+  ['cost','持有成本趋势','HOA 储备金、地税核定风险、特别摊派'],
+];
+const zeroFactors = () => FACTORS.map(()=>({s:0,note:''}));
+function factorInfo(p){
+  const f = (p.factors && p.factors.length===FACTORS.length) ? p.factors : zeroFactors();
+  const sum = f.reduce((a,x)=>a+((x&&x.s)||0),0);
+  const band = sum>=6?['支撑强','ok']:sum>=2?['中性偏正','offer']:sum>=-1?['中性','plain']:['支撑弱','flag'];
+  const [sc,st,su,de] = [f[0].s,f[1].s,f[3].s,f[4].s];
+  let advice;
+  if(su<0||de<0){
+    const weak=[]; if(su<0)weak.push('退出时与同楼盘/同区在售库存直接竞争'); if(de<0)weak.push('当前买方热度不足');
+    advice = `供需信号偏弱(${weak.join(';')})。`;
+    if(sc>0||st>0) advice += `${[sc>0?'学区':null,st>0?'位置/交通':null].filter(Boolean).join('+')}构成跨周期支撑:以更低进场价对冲短期退出风险(压价 + credit),或将持有期延长至供给消化后(约 5 年以上)。`;
+    else advice += `且缺乏学区/位置支撑:短期退出风险高——除非价格显著低于市场,否则建议放弃或按长期持有评估。`;
+  } else if(sc>0&&st>0){ advice = `供需信号中性偏正,学区/位置支撑扎实:${p.holdYears&&p.holdYears<=5?'3-4 年退出':'长期持有'}与长期持有均成立,按目标函数执行。`; }
+  else { advice = `信号总体中性:以进场纪律(总让步)与现金流约束为主;持有期长短皆可,避免为短期低月供接受更高合同价。`; }
+  return {f, sum, band, advice};
+}
+function scoreBadge(s){
+  if(s>0) return `<b style="color:var(--ok)">+${s}</b>`;
+  if(s<0) return `<b style="color:var(--danger)">${s}</b>`;
+  return '<span class="muted">0</span>';
+}
+/* 退出情景:按起报价与持有年限,三种年化假设下的净回笼与持有成本 */
+function exitScenarios(p){
+  const t = p.tiers && p.tiers[0];
+  if(!t || !t.price || !p.rate) return null;
+  const hold = p.holdYears || 3;
+  const P=t.price, d=(p.downPct??10)/100, L=P*(1-d);
+  const r=p.rate/100/12, m=(p.term||30)*12, n=Math.round(hold*12);
+  const bal = L*((Math.pow(1+r,m)-Math.pow(1+r,n))/(Math.pow(1+r,m)-1));
+  const pi = pmt(L,p.rate,p.term||30);
+  const down = P*d;
+  const rows = [-0.02,0,0.02].map(g=>{
+    const sale = P*Math.pow(1+g,hold);
+    const net = sale*0.94 - bal;               // 扣 6% 卖房成本后净回笼
+    const paid = down + pi*n;
+    return {g, sale, net, cost: paid-net, month:(paid-net)/n};
+  });
+  return {rows, pi, bal, down, hold, price:P};
+}
+
+function seedDb(){
+  return { properties: [
+    {
+      id:'ex-lewis', seed:true, name:'52 Lewis Ave(示例·两户Condo)', addr:'Arlington, MA · 4卧 · 2,308 sqft · 含579 sqft地下层',
+      status:0, holdYears:3, listPrice:1259000, hoaMonthly:215, taxAnnual:null, insMonthly:100, pmiMonthly:0,
+      downPct:10, rate:7.0, term:30, notes:'⚠️ 疑点:此前"50 Lewis #50"与本案使用相同厨房照片与平面图、同面积、同经纪人,高度疑似换牌重挂,需经纪人调 MLS 正式确认。\n披露:"一楼50%及墙体为原有结构"——2026新房标签需打折扣,索要施工范围与许可。\n地税未核定,HOA $215/月为估算。\n优势:车库+室外车位;劣势:四层动线,主卧三楼,抱娃/父母同住要实地走一遍。',
+      history:[
+        {date:'2026-06-04',label:'挂牌(50 Lewis)',price:1399000},
+        {date:'2026-08-24',label:'撤牌',price:1318000},
+        {date:'2026-09-08',label:'重新挂牌(52 Lewis)',price:1298000},
+        {date:'2026-09-18',label:'降价',price:1259000},
+      ],
+      tiers:[
+        {label:'偏强硬起报价',price:1150000,creditPct:3},
+        {label:'有实质反价后',price:1175000,creditPct:3},
+        {label:'重新评估是否继续',price:1200000,creditPct:3},
+      ],
+      comps:[
+        {addr:'34 Lewis(同街)',price:1175000,date:'2025-09',beds:4,sqft:2748,note:'老房改建,不能直接等同'},
+        {addr:'35 Summer',price:1389000,date:'2026-06',beds:3,sqft:2333,note:'2026新房,地下层582,面积构成接近'},
+        {addr:'24 Beacon',price:1420000,date:'2026-07',beds:3,sqft:2119,note:'2022 townhouse,双车库位'},
+      ],
+      checklist:{0:'ok',1:'flag',7:'flag',11:'ok'},
+      factors:[
+        {s:1,note:'Arlington 学区整体强'},
+        {s:1,note:'近 Boston,通勤便利'},
+        {s:0,note:'保留部分原结构与墙体,翻新深度待查'},
+        {s:0,note:'两户项目,兄弟单元情况待查'},
+        {s:-1,note:'疑似换牌重挂,累计约110天在售'},
+        {s:0,note:''},
+        {s:-1,note:'地税未核定,HOA 为估算'},
+      ]
+    },
+    {
+      id:'ex-condo3', seed:true, name:'顶层 Condo #3(示例·翻新转售)', addr:'4卧 · 1,736 sqft · 3户HOA · 私人屋顶露台',
+      status:0, holdYears:3, listPrice:849000, hoaMonthly:385, taxAnnual:8981, insMonthly:100, pmiMonthly:175,
+      downPct:10, rate:7.12, term:30, notes:'2022年 $725k 成交后翻新再卖,挂牌41天连续降价 $875k→$849k。\n建筑实为1880年老结构大改造(2021旧挂牌写1880,更新屋顶/水电/暖通),需施工文件确认。\n必查:楼梯动线(顶层)、屋顶露台防水与责任归属、3户HOA储备金。\n同楼 #1(2卧1,230sqft)2025-08 成交 $760k,是卖方的底气也是我们的锚点。',
+      history:[
+        {date:'2022-02-01',label:'上一次成交',price:725000},
+        {date:'2026-08-12',label:'挂牌',price:875000},
+        {date:'2026-08-26',label:'降价',price:859000},
+        {date:'2026-09-08',label:'降价',price:849000},
+      ],
+      tiers:[
+        {label:'强硬起报',price:790000,creditPct:3},
+        {label:'第一档调整',price:800000,creditPct:3},
+        {label:'可重点争取',price:810000,creditPct:3},
+        {label:'需重新比较其他房源',price:820000,creditPct:3},
+      ],
+      comps:[
+        {addr:'同楼 #1',price:760000,date:'2025-08',beds:2,sqft:1230,note:'单层布局;#3 爬楼,不能按面积机械放大'},
+      ],
+      checklist:{0:'ok',1:'ok',5:'flag',7:'ok',8:'flag',11:'ok'},
+      factors:[
+        {s:1,note:'Newton 学区'},
+        {s:1,note:''},
+        {s:1,note:'屋顶/水电/暖通全面更新'},
+        {s:0,note:'同楼 #1 已售,无在售库存竞争'},
+        {s:-1,note:'41 天 3 次降价'},
+        {s:0,note:''},
+        {s:0,note:'HOA $385,储备金待查'},
+      ]
+    }
+  ]};
+}
+let db;
+function load(){
+  try{ db = JSON.parse(localStorage.getItem(LS_KEY)) || null; }catch(e){ db = null; }
+  if(!db || !Array.isArray(db.properties)) db = seedDb();
+  db.properties.forEach(p=>{ if(!p.factors || p.factors.length!==FACTORS.length) p.factors = zeroFactors(); });
+}
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(db)); render(); }
+const getProp = id => db.properties.find(p=>p.id===id);
+
+/* ---------------- 链接/地址解析(看板万能输入) ---------------- */
+function humanizeTokens(raw){
+  const toks = String(raw).split(/[-_]+/).filter(Boolean);
+  const zipIdx = toks.findIndex(t=>/^\d{5}$/.test(t));
+  let zip=null, state=null, core=toks.slice();
+  if(zipIdx>-1){
+    zip = toks[zipIdx];
+    if(zipIdx>0 && /^[A-Za-z]{2}$/.test(toks[zipIdx-1])){ state = toks[zipIdx-1].toUpperCase(); core = toks.slice(0,zipIdx-1); }
+    else core = toks.slice(0,zipIdx);
+  } else if(core.length>1 && /^[A-Za-z]{2}$/.test(core[core.length-1])){
+    state = core.pop().toUpperCase();
+  }
+  core = core.map(t=>/^\d/.test(t) ? t : t.charAt(0).toUpperCase()+t.slice(1).toLowerCase());
+  let s = core.join(' ');
+  if(state) s += `, ${state}`;
+  if(zip) s += ` ${zip}`;
+  return s;
+}
+function parseListingInput(str){
+  const um = str.match(/https?:\/\/[^\s]+/i);
+  if(!um) return {addr:str.trim(), url:null, platform:null};
+  const url = um[0];
+  try{
+    const u = new URL(url);
+    const seg = u.pathname.split('/').filter(Boolean).map(s=>decodeURIComponent(s));
+    const platform = /redfin\./.test(u.host)?'Redfin' : /zillow\./.test(u.host)?'Zillow' : /realtor\./.test(u.host)?'Realtor.com' : '网页';
+    const notAddr = s => ['homedetails','apartments','b','for_sale','for-rent','rental','building','condos','new-construction'].includes(s)
+      || /_zpid$/.test(s)
+      || /^-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?_ll$/.test(s)   // 经纬度段
+      || /^\d{4,}$/.test(s);                               // 纯 id 段
+    let addr='';
+    if(platform==='Redfin' && seg.length>=3){
+      const zipM = seg[2].match(/-(\d{5})$/);
+      const street = humanizeTokens(zipM ? seg[2].slice(0,-6) : seg[2]);
+      addr = street + ', ' + humanizeTokens(seg[1]) + ', ' + seg[0].toUpperCase() + (zipM ? ' ' + zipM[1] : '');
+    } else if(platform==='Zillow'){
+      const hd = seg.find(s=>!notAddr(s));
+      addr = hd ? humanizeTokens(hd) : '';
+    } else if(platform==='Realtor.com' && seg.length>=2){
+      addr = humanizeTokens(seg[1].replace(/_M\d+.*$/,''));
+    }
+    // 兜底:解析结果太短(如孤立的 "b")时,退回原始输入
+    if(!addr || addr.replace(/[^A-Za-z0-9]/g,'').length < 5) addr = str.trim().replace(/https?:\/\/\S+/ig,'').trim() || str.trim();
+    return {addr, url, platform};
+  }catch(e){ return {addr:str.trim(), url, platform:null}; }
+}
+function quickAdd(){
+  const inp = $('#qaInput');
+  const v = inp && inp.value.trim();
+  if(!v){ toast('先粘贴一个 Redfin / Zillow 链接,或直接输入地址', false); return; }
+  const d = parseListingInput(v);
+  // 防重:同一来源链接已有档案 → 直接打开
+  if(d.url){
+    const exist = db.properties.find(p => p.srcUrl && p.srcUrl === d.url);
+    if(exist){ openProp(exist.id); inp.value=''; toast('已有该房源档案,已打开' + (exist.listPrice ? '' : ' · 数据待充填')); return; }
+  }
+  newProp({name:d.addr, addr:d.addr, srcUrl:d.url});
+  inp.value='';
+  toast('已建档:' + d.addr + ' · 数据充填方式见详情页');
+  // 部署环境下静默尝试服务端充填(未配置数据源时无提示,不干扰)
+  if(d.url && /^https?:$/.test(location.protocol)){
+    const nid = db.properties[0].id;
+    serverFill(nid, true).catch(()=>{});
+  }
+}
+/* AI 充填:复制提示词(链接+schema),AI 返回 JSON 后在「数据」页导入 */
+function copyAIPrompt(id){
+  const p = getProp(id); if(!p) return;
+  const prompt = `请抓取这个挂牌页的完整数据:${p.srcUrl||'(补充链接)'}\n\n需要:当前挂牌价;每一轮挂牌历史(日期/事件/价格,注意换牌重挂);卧卫与面积;HOA;地税(是否已核定);建造年份;在售天数与浏览/收藏;同楼盘在售单元(地址/价格/面积);周边 3 个可比成交;学区评分。\n\n只输出可导入的 JSON(无其他文字),格式:\n{"properties":[{"name":"…","addr":"城市 · n卧 · 面积","listPrice":0,"hoaMonthly":null,"taxAnnual":null,"holdYears":${p.holdYears||3},"srcUrl":"…","history":[{"date":"YYYY-MM-DD","label":"挂牌|降价|撤牌|重新挂牌|上一次成交","price":0}],"tiers":[{"label":"偏强硬起报价","price":0,"creditPct":3}],"comps":[{"addr":"…","price":0,"date":"YYYY-MM","beds":0,"sqft":0,"note":""}],"factors":[{"s":0,"note":""}],"notes":"抓取情报汇总"}]}\n\nfactors 七维顺序:[学区,位置交通,房屋品质,同区供给,需求信号,利率敏感度,持有成本],每维 s∈[-2,2] 且 note 写证据。tiers 按总让步 9%/7%/5.5%(3% credit)三档换算合同价。`;
+  (navigator.clipboard ? navigator.clipboard.writeText(prompt) : Promise.reject()).then(
+    ()=>toast('提示词已复制 —— 发给 ZCode / ChatGPT,把返回的 JSON 在「数据」页导入'),
+    ()=>{ window.prompt('复制以下提示词发给 AI:', prompt); }
+  );
+}
+
+/* ---------------- 持有期(目标函数) ---------------- */
+const fmtHold = h => (h%1?h.toFixed(1):h)+'年';
+const holdType = h => h==null?null:(h<=5?'短期':(h<=9?'中期':'长期'));
+function setHold(id,v){ const p=getProp(id); p.holdYears=v; save(); renderSheet(id); }
+function holdHint(p){
+  const h=p.holdYears;
+  if(h==null) return ' <b>持有计划未设定</b>(「基本信息」)——短期与长期对"降价 vs credit"的偏好不同。';
+  if(h<=5) return ` 短期持有(${fmtHold(h)}):等额让步下,credit/buydown 的持有期月供减免约为降价方式的 4 倍(≈$1 vs ≈$0.24),且不增加本金;降价价值体现在退出净值。`;
+  return ` 长期持有(${fmtHold(h)}):优先压价——7% 量级利率下每 $1 降价约减少 30 年利息 $1.4;credit 仅等于头几年的 $1。`;
+}
+
+/* ---------------- 派生指标 ---------------- */
+function propMetrics(p){
+  const m = {firstDate:null, firstPrice:null, curRoundDate:null, cuts:0, totalCutsPct:null, dom:null, roundDom:null, relist:false};
+  const listed = p.history.filter(h=>/挂牌/.test(h.label)&&h.price);
+  if(listed.length){
+    m.firstDate = listed[0].date; m.firstPrice = listed[0].price;
+    const last = listed[listed.length-1];
+    m.curRoundDate = last.date;
+    if(listed.length>1) m.relist = true;
+    m.dom = daysBetween(m.firstDate, todayStr());
+    m.roundDom = daysBetween(m.curRoundDate, todayStr());
+  }
+  m.cuts = p.history.filter(h=>/降价/.test(h.label)).length;
+  if(m.firstPrice && p.listPrice) m.totalCutsPct = (m.firstPrice-p.listPrice)/m.firstPrice*100;
+  return m;
+}
+
+/* ---------------- 看板 ---------------- */
+function renderBoard(){
+  const el = $('#main');
+  if(!db.properties.length){
+    el.innerHTML = `<div class="card empty">
+      ${IC.home}
+      <div class="t">看板还是空的</div>
+      <div class="muted mb">把 Redfin / Zillow 链接或任意地址粘贴到上方输入框建档</div>
+      <div class="flex" style="justify-content:center">
+        <button class="btn" onclick="newProp()">${IC.plus} 手动新增房源</button>
+        <button class="btn ghost" onclick="restoreSeed()">${IC.restore} 恢复示例案例</button>
+      </div></div>`;
+    return;
+  }
+  // 概览统计
+  const flags = db.properties.reduce((n,p)=>n+Object.values(p.checklist||{}).filter(v=>v==='flag').length,0);
+  const cons = db.properties.map(p=>{
+    const t=p.tiers?.[0]; return (t?.price&&p.listPrice)?concession(p.listPrice,t.price,t.creditPct).pct:null;
+  }).filter(v=>v!=null);
+  const avgCons = cons.length? cons.reduce((a,b)=>a+b,0)/cons.length : null;
+  const statRow = `<div class="stat-row">
+    <div class="stat"><div class="lbl">${IC.home}在追房源</div><div class="val">${db.properties.length}<small> 套</small></div></div>
+    <div class="stat"><div class="lbl">${IC.trend}平均起报让步</div><div class="val">${avgCons!=null?avgCons.toFixed(1)+'%':'—'}</div></div>
+    <div class="stat"><div class="lbl" style="${flags?'color:var(--danger)':''}">${IC.alert}待处理警示</div><div class="val" style="${flags?'color:var(--danger)':''}">${flags}<small> 项</small></div></div>
+  </div>`;
+  const cards = db.properties.map((p,i)=>{
+    const m = propMetrics(p);
+    const st = STATUSES[p.status]||STATUSES[0];
+    const t1 = p.tiers?.[0];
+    const c1 = t1&&t1.price ? concession(p.listPrice, t1.price, t1.creditPct) : null;
+    const done = Object.values(p.checklist||{}).filter(v=>v==='ok').length;
+    const pflags = Object.values(p.checklist||{}).filter(v=>v==='flag').length;
+    const total = CHECKLIST.length;
+    return `<div class="card hoverable pcard" onclick="openProp('${p.id}')">
+      <div class="top">
+        <div style="min-width:0">
+          <div class="name">${esc(p.name)}</div>
+          <div class="addr">${esc(p.addr||'')}</div>
+        </div>
+        <span class="pill ${st[1]}">${st[0]}</span>
+      </div>
+      <div class="priceline">
+        <span class="price">${usd(p.listPrice)}</span>
+        ${m.firstPrice&&m.firstPrice!==p.listPrice?`<span class="was">${usd(m.firstPrice)}</span><span class="pill dd">${pct1(-m.totalCutsPct)}</span>`:''}
+        ${p.seed?'<span class="pill plain">示例</span>':''}
+      </div>
+      <div class="spark">${spark(p.history,320,56,i)}</div>
+      <div class="stats">
+        ${m.dom!=null?`<span class="stat-chip">${IC.clock} 首挂至今 <b>${m.dom}天</b>${m.relist?' · <b style="color:var(--warn)">重挂</b>':''}</span>`:''}
+        ${m.cuts?`<span class="stat-chip">降价 <b>${m.cuts}次</b></span>`:''}
+        ${p.holdYears!=null?`<span class="stat-chip">${IC.target} 持有 <b>${fmtHold(p.holdYears)}</b>·${holdType(p.holdYears)}</span>`:`<span class="stat-chip" style="color:var(--warn)">${IC.target} 未设持有计划</span>`}
+        ${(()=>{const s=(p.factors||[]).reduce((a,x)=>a+((x&&x.s)||0),0);return `<span class="stat-chip">${IC.gauge} 支撑 <b style="color:${s>=2?'var(--ok)':(s<=-2?'var(--danger)':'var(--ink)')}">${s>0?'+':''}${s}</b></span>`;})()}
+        ${p.srcUrl && !p.listPrice?`<span class="stat-chip" style="color:var(--warn)">${IC.alert} 数据待充填</span>`:''}
+        ${c1?`<span class="stat-chip">起报让步 <b style="color:var(--ok)">${pct1(-c1.pct)}</b></span>`:''}
+      </div>
+      <div class="foot">
+        <div class="flex" style="flex:1;min-width:140px">
+          <div class="progress"><i style="width:${done/total*100}%"></i></div>
+          <span class="muted num">尽调 ${done}/${total}${pflags?` · <span style="color:var(--danger);font-weight:650">⚠${pflags}</span>`:''}</span>
+        </div>
+        <button class="icon-btn" title="删除" onclick="event.stopPropagation();delProp('${p.id}')">${IC.trash}</button>
+      </div>
+    </div>`;
+  }).join('');
+  el.innerHTML = `
+    <div class="page-head">
+      <div><h1>房源看板</h1><div class="sub">挂牌历史 · 重挂检测 · 谈判阶梯 · 尽调进度</div></div>
+    </div>
+    <div class="card mb" style="padding:12px 14px">
+      <div class="flex" style="flex-wrap:nowrap;gap:8px">
+        <input id="qaInput" placeholder="粘贴 Redfin / Zillow / Realtor 链接,或任意地址 —— 回车建档" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter')quickAdd()">
+        <button class="btn" onclick="quickAdd()" style="flex:0 0 auto">${IC.plus} 建档</button>
+      </div>
+      <div class="note" style="margin-top:6px">建档后需充填数据(书签充填器 / 粘贴解析 / 服务端 / AI),再点详情页右上打印机图标生成报告。</div>
+    </div>
+    <div class="flex" style="justify-content:flex-end;margin-bottom:14px">
+      <button class="btn ghost" onclick="newProp()">${IC.plus} 手动新增</button>
+    </div>
+    ${statRow}
+    <div class="grid g3">${cards}</div>`;
+}
+
+/* ---------------- 详情抽屉 ---------------- */
+function openProp(id){ renderSheet(id); $('#overlay').style.display='flex'; }
+function closeProp(){ $('#overlay').style.display='none'; }
+$('#overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeProp(); });
+
+function newProp(prefill={}){
+  const p = {
+    id:'p'+Date.now(), name:prefill.name||'新房源', addr:prefill.addr||'', srcUrl:prefill.srcUrl||null, status:0, holdYears:null, factors:zeroFactors(),
+    listPrice:null, hoaMonthly:null, taxAnnual:null, insMonthly:null, pmiMonthly:0,
+    downPct:20, rate:6.75, term:30, notes:'',
+    history:[], tiers:[{label:'偏强硬起报价',price:null,creditPct:3},{label:'第一档调整',price:null,creditPct:3},{label:'重新评估上限',price:null,creditPct:3}],
+    comps:[], checklist:{}
+  };
+  db.properties.unshift(p); save(); openProp(p.id);
+}
+function delProp(id){
+  const p = getProp(id); if(!p) return;
+  if(!confirm(`删除「${p.name}」?此操作不可撤销。`)) return;
+  db.properties = db.properties.filter(x=>x.id!==id); save(); closeProp();
+}
+
+function setPath(o, path, v){
+  const parts = path.split('.');
+  while(parts.length>1) o = o[parts.shift()];
+  o[parts[0]] = v;
+}
+function bindSheet(p){
+  const handler = key => e => {
+    const v = e.target.type==='number' ? (e.target.value===''?null:parseFloat(e.target.value)) : e.target.value;
+    setPath(p, e.target.dataset[key], v); save(); renderSheet(p.id);
+  };
+  $$('#sheet [data-f]').forEach(el=>el.addEventListener('change', handler('f')));
+  $$('#sheet select[data-s]').forEach(el=>el.addEventListener('change', e=>{ p[e.target.dataset.s]=parseInt(e.target.value); save(); renderSheet(p.id); }));
+  $$('#sheet [data-h]').forEach(el=>el.addEventListener('change', handler('h')));
+  $$('#sheet [data-t]').forEach(el=>el.addEventListener('change', handler('t')));
+  $$('#sheet [data-c]').forEach(el=>el.addEventListener('change', handler('c')));
+  $$('#sheet [data-x]').forEach(el=>el.addEventListener('change', handler('x')));
+}
+function setFactor(id,i,s){
+  const p = getProp(id); if(!p) return;
+  if(!p.factors || p.factors.length!==FACTORS.length) p.factors = zeroFactors();
+  p.factors[i].s = s; save(); renderSheet(id);
+}
+
+function renderSheet(id){
+  const p = getProp(id); if(!p) return;
+  const m = propMetrics(p);
+  const st = STATUSES[p.status]||STATUSES[0];
+  const histRows = p.history.map((h,i)=>`<tr>
+      <td style="width:136px"><input type="date" value="${h.date||''}" data-h="history.${i}.date"></td>
+      <td><input type="text" value="${esc(h.label)}" list="evlist" placeholder="挂牌/降价/撤牌…" data-h="history.${i}.label"></td>
+      <td style="width:142px" class="num"><input type="number" inputmode="decimal" value="${h.price??''}" placeholder="$" data-h="history.${i}.price"></td>
+      <td style="width:40px"><button class="icon-btn" onclick="rmRow('${p.id}','history',${i})" title="删除">${IC.x}</button></td>
+    </tr>`).join('');
+  const tierRows = p.tiers.map((t,i)=>{
+    const c = (t.price&&p.listPrice) ? concession(p.listPrice,t.price,t.creditPct) : null;
+    const barW = c? Math.min(100, Math.abs(c.pct)/15*100) : 0;
+    return `<tr class="${i===0?'tier-opener':''}">
+      <td><input type="text" value="${esc(t.label)}" data-t="tiers.${i}.label" placeholder="档位说明"></td>
+      <td style="width:122px" class="num"><input type="number" inputmode="decimal" value="${t.price??''}" placeholder="$" data-t="tiers.${i}.price"></td>
+      <td style="width:66px" class="num"><input type="number" inputmode="decimal" step="0.5" value="${t.creditPct??3}" data-t="tiers.${i}.creditPct"></td>
+      <td class="num">${c?usd(c.credit):'—'}</td>
+      <td class="num">${c?usd(c.sellerNet):'—'}</td>
+      <td class="num"><b style="font-weight:700;color:${c&&c.pct<0?'var(--danger)':'inherit'}">${c?pct1(-c.pct):'—'}</b><span class="cbar ${c&&c.pct>9?'hot':''}"><i style="width:${barW}%"></i></span></td>
+      <td style="width:40px"><button class="icon-btn" onclick="rmRow('${p.id}','tiers',${i})" title="删除">${IC.x}</button></td>
+    </tr>`;
+  }).join('');
+  const compRows = p.comps.map((c,i)=>`<tr>
+      <td><input type="text" value="${esc(c.addr)}" placeholder="地址" data-c="comps.${i}.addr"></td>
+      <td style="width:122px" class="num"><input type="number" inputmode="decimal" value="${c.price??''}" placeholder="$" data-c="comps.${i}.price"></td>
+      <td style="width:112px"><input type="month" value="${c.date||''}" data-c="comps.${i}.date"></td>
+      <td style="width:52px" class="num"><input type="number" inputmode="decimal" value="${c.beds??''}" placeholder="卧" data-c="comps.${i}.beds"></td>
+      <td style="width:80px" class="num"><input type="number" inputmode="decimal" value="${c.sqft??''}" placeholder="sqft" data-c="comps.${i}.sqft"></td>
+      <td class="num">${(c.price&&c.sqft)?'$'+Math.round(c.price/c.sqft):'—'}</td>
+      <td><input type="text" value="${esc(c.note||'')}" placeholder="备注" data-c="comps.${i}.note"></td>
+      <td style="width:40px"><button class="icon-btn" onclick="rmRow('${p.id}','comps',${i})" title="删除">${IC.x}</button></td>
+    </tr>`).join('');
+  const checkItems = CHECKLIST.map((c,i)=>{
+    const stt = (p.checklist||{})[i]||'';
+    return `<div class="check-item" data-st="${stt}" onclick="cycleCheck('${p.id}',${i})" title="点击切换:待办 → ✓确认 → ⚠有问题">
+      <div class="box">${IC.check}</div>
+      <div><div class="txt">${esc(c[0])}</div><div class="sub">${esc(c[1])}</div></div>
+    </div>`;
+  }).join('');
+  const done = Object.values(p.checklist||{}).filter(v=>v==='ok').length;
+
+  $('#sheet').innerHTML = `
+    <div class="shead">
+      <h3>${esc(p.name)}${p.srcUrl?` <a class="pill plain" href="${esc(p.srcUrl)}" target="_blank" rel="noopener" style="text-decoration:none">来源↗</a>`:''}</h3>
+      <select data-s="status" style="width:auto;font-weight:600">${STATUSES.map((s,i)=>`<option value="${i}" ${p.status===i?'selected':''}>${s[0]}</option>`).join('')}</select>
+      <button class="icon-btn" onclick="genReport('${p.id}')" title="生成报告(可打印/存 PDF)">${IC.print}</button>
+      <button class="icon-btn" onclick="closeProp()" title="关闭">${IC.x}</button>
+    </div>
+
+    <h2 class="sec">${IC.home} 基本信息</h2>
+    ${p.srcUrl && !p.listPrice ? `<div class="callout warn" style="margin-bottom:12px"><span>${IC.alert}</span><div><b>数据待充填</b>:链接仅建立档案,尚无价格与历史。充填方式:① 书签充填器(「数据」页安装,在房源页点击);② 下方「粘贴解析」;③ 服务端 / AI 充填。完成后点右上打印机图标生成报告。</div></div>`:''}
+    <div class="card">
+      <div class="row">
+        <div class="field" style="flex:2"><label class="f">房源名称</label><input type="text" value="${esc(p.name)}" data-f="name"></div>
+        <div class="field" style="flex:2"><label class="f">地址 / 概要</label><input type="text" value="${esc(p.addr)}" placeholder="城市 · 卧室数 · 面积" data-f="addr"></div>
+      </div>
+      <div class="row">
+        <div class="field" style="flex:1 1 150px"><label class="f">持有计划(年)· 决定目标函数</label>
+          <input type="number" inputmode="decimal" min="0.5" step="0.5" value="${p.holdYears??''}" placeholder="如 3 或 4" data-f="holdYears"></div>
+        <div class="field" style="flex:2 1 240px"><label class="f">快速设定 ${p.holdYears!=null?`· 当前:${holdType(p.holdYears)} ${fmtHold(p.holdYears)}`:''}</label>
+          <div class="seg">
+            ${[3,4,5,10,30].map(n=>`<button type="button" class="${p.holdYears===n?'on':''}" onclick="setHold('${p.id}',${n})">${n}年</button>`).join('')}
+          </div></div>
+      </div>
+      <div class="row">
+        <div class="field"><label class="f">当前挂牌价 $</label><input type="number" inputmode="decimal" value="${p.listPrice??''}" data-f="listPrice"></div>
+        <div class="field"><label class="f">HOA $/月</label><input type="number" inputmode="decimal" value="${p.hoaMonthly??''}" data-f="hoaMonthly"></div>
+        <div class="field"><label class="f">地税 $/年</label><input type="number" inputmode="decimal" value="${p.taxAnnual??''}" data-f="taxAnnual"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label class="f">保险 $/月</label><input type="number" inputmode="decimal" value="${p.insMonthly??''}" data-f="insMonthly"></div>
+        <div class="field"><label class="f">PMI $/月</label><input type="number" inputmode="decimal" value="${p.pmiMonthly??0}" data-f="pmiMonthly"></div>
+        <div class="field" style="flex:2 1 200px"><label class="f">来源链接(Redfin / Zillow)</label><input type="url" value="${esc(p.srcUrl||'')}" placeholder="https://…" data-f="srcUrl"></div>
+      </div>
+      ${m.relist?`<div class="callout warn"><span>${IC.alert}</span><div>检测到多轮挂牌:首挂 ${m.firstDate} 至今 <b>${m.dom} 天</b>,当前轮次 ${m.roundDom} 天。"新上市两周"可能掩盖真实的长期在售——这是重要议价依据,但需 MLS 完整记录正式确认。</div></div>`:''}
+    </div>
+
+    <details class="card" style="padding:12px 16px;margin-top:12px" ${(!p.listPrice && p.srcUrl)?'open':''}>
+      <summary style="cursor:pointer;font-weight:650;font-size:13px;user-select:none">${!p.listPrice?'数据充填:粘贴解析 / 服务端 / AI':'从挂牌页粘贴 · 自动填表'}</summary>
+      <div class="note" style="margin-top:6px">方式一:打开 <a href="${esc(p.srcUrl||'')}" target="_blank" rel="noopener" style="color:var(--brand)">来源页↗</a>,复制页面文字后粘贴解析;方式二:「服务端充填」(需部署并配置数据源);方式三:「AI 充填」复制提示词发给 AI 助手,返回 JSON 在「数据」页导入。</div>
+      <textarea id="pasteBox" rows="5" class="mt" placeholder="把 Redfin / Zillow 房源页整页文字粘贴到这里…"></textarea>
+      <div class="mt flex">
+        <button class="btn soft mini" onclick="pasteParse('${p.id}')">${IC.check} 解析并填入</button>
+        <button class="btn ghost mini" onclick="serverFill('${p.id}')">${IC.down} 服务端充填</button>
+        <button class="btn ghost mini" onclick="copyAIPrompt('${p.id}')">${IC.star} 让 AI 充填(复制提示词)</button>
+        <span class="muted">只填空白字段</span>
+      </div>
+    </details>
+
+    <h2 class="sec">${IC.trend} 挂牌历史 <span class="n">议价证据的核心</span></h2>
+    <div class="card">
+      ${p.history.filter(h=>h.price).length>=2?`<div class="mb">${spark(p.history,680,110,'d'+id)}</div>`:''}
+      <table class="t"><thead><tr><th>日期</th><th>事件</th><th class="num">价格</th><th></th></tr></thead>
+      <tbody>${histRows||'<tr><td colspan="4" class="muted" style="padding:14px 8px">尚无记录 —— 从第一轮挂牌价开始录入</td></tr>'}</tbody></table>
+      <div class="mt flex">
+        <button class="btn soft mini" onclick="addRow('${p.id}','history')">${IC.plus} 添加记录</button>
+        ${m.firstPrice&&p.listPrice?`<span class="muted num">累计降幅 <b style="color:var(--warn)">${pct1(-m.totalCutsPct)}</b>(首挂 ${usd(m.firstPrice)} → 当前 ${usd(p.listPrice)},跨 ${m.dom} 天)</span>`:''}
+      </div>
+      <datalist id="evlist"><option>挂牌</option><option>降价</option><option>撤牌</option><option>重新挂牌</option><option>上一次成交</option><option>成交</option><option>签约后退出</option></datalist>
+    </div>
+
+    <h2 class="sec">${IC.chev} 谈判阶梯 <span class="n">内部使用 · 勿透露给卖方</span></h2>
+    <div class="card">
+      <table class="t"><thead><tr><th>档位</th><th class="num">合同价</th><th class="num">Credit %</th><th class="num">Credit $</th><th class="num">卖方到手*</th><th class="num">总让步</th><th></th></tr></thead>
+      <tbody>${tierRows||'<tr><td colspan="7" class="muted" style="padding:14px 8px">尚无档位</td></tr>'}</tbody></table>
+      <div class="mt flex"><button class="btn soft mini" onclick="addRow('${p.id}','tiers')">${IC.plus} 添加档位</button></div>
+      <div class="note">*卖方到手 = 合同价 − credit,尚未扣除佣金、贷款偿还及其他卖方费用。卖方把降价和 credit <b>合并计算总让步</b>,所以比较总让步%,而不是单看价格。首行(高亮)为起报价:偏强硬、试探卖方反应,约 8–10% 总让步 + 3% credit 是常见起点。${holdHint(p)}</div>
+    </div>
+
+    <h2 class="sec">${IC.home} 参考成交 Comps</h2>
+    <div class="card">
+      <table class="t"><thead><tr><th>地址</th><th class="num">成交价</th><th>时间</th><th class="num">卧</th><th class="num">sqft</th><th class="num">$/sqft</th><th>备注</th><th></th></tr></thead>
+      <tbody>${compRows||'<tr><td colspan="8" class="muted" style="padding:14px 8px">尚无记录</td></tr>'}</tbody></table>
+      <div class="mt"><button class="btn soft mini" onclick="addRow('${p.id}','comps')">${IC.plus} 添加参考</button></div>
+      <div class="note">同项目/同类型/同期的成交最有分量;跨街区参考需先调整位置、施工质量、布局与补贴差异,不能直接取平均当估值。</div>
+    </div>
+
+    <h2 class="sec">${IC.gauge} 房价支撑分析 <span class="n">七维评分 · 决定你该持有多久</span>
+      <span style="flex:1"></span><button class="btn ghost mini" onclick="aiAnnotate('${p.id}')" title="用你自己的 AI 填充证据与建议(在数据页配置)">${IC.star} AI 批注</button></h2>
+    <div class="card">
+      ${FACTORS.map((F,i)=>{
+        const f = (p.factors||[])[i]||{s:0,note:''};
+        return `<div style="padding:10px 0;border-bottom:1px dashed var(--line)">
+          <div class="flex" style="justify-content:space-between;flex-wrap:wrap;gap:6px">
+            <div style="min-width:180px;flex:1"><b style="font-size:13px">${F[1]}</b><div class="muted" style="font-size:11.5px">${F[2]}</div></div>
+            <div class="flex" style="gap:4px;flex-wrap:nowrap">
+              ${[-2,-1,0,1,2].map(v=>`<button type="button" class="fbtn ${f.s===v?'on ':''}${v===-2?'vm2':v===-1?'vm1':v===1?'v1':v===2?'v2':'v0'}" onclick="setFactor('${p.id}',${i},${v})" title="${v===-2?'严重拖累':v===-1?'略拖累':v===0?'中性':v===1?'略支撑':'强支撑'}">${v>0?'+'+v:v}</button>`).join('')}
+            </div>
+          </div>
+          <input style="margin-top:7px;font-size:12px" placeholder="证据 / 数据(会写进报告)" value="${esc(f.note||'')}" data-x="factors.${i}.note">
+        </div>`;
+      }).join('')}
+      ${(()=>{ const fi=factorInfo(p); return `<div class="kvrow mt"><span>综合支撑指数</span><b>${fi.sum>0?'+':''}${fi.sum} / +14 <span class="pill ${fi.band[1]}">${fi.band[0]}</span></b></div>
+        <div class="callout info"><span>${IC.target}</span><div>${fi.advice}</div></div>`; })()}
+      <div class="note">七维评分用于持有年限决策:供需/需求信号弱 → 短期退出风险高,需压价对冲或延长持有;学区/位置强 → 支撑扎实。报告页自动生成退出情景测算。</div>
+    </div>
+
+    <h2 class="sec">${IC.check.replace('stroke-width="3"','stroke-width="2.4"')} 尽调清单 <span class="n">已完成 ${done}/${CHECKLIST.length} · 点击条目切换:待办 → ✓ 确认 → ⚠ 有问题</span></h2>
+    <div class="card">${checkItems}</div>
+
+    <h2 class="sec">${IC.restore.replace('M3 12a9','M3 12a9')} 备注</h2>
+    <div class="card">
+      <textarea rows="7" placeholder="疑点、卖方动机、实地看房记录、经纪人的回答……" data-f="notes">${esc(p.notes||'')}</textarea>
+      <div class="note">💡 在「计算器」页绑定这套房,可直接用这里的阶梯与费率算 buydown 月供。</div>
+    </div>`;
+  bindSheet(p);
+}
+/* 服务端充填:调用部署版的 /api/property(持牌数据 API),静态/本地环境自动降级 */
+async function serverFill(id, silent){
+  const p = getProp(id); if(!p) return;
+  if(!silent) toast('服务端充填中…');
+  try{
+    const q = p.srcUrl ? 'url='+encodeURIComponent(p.srcUrl) : 'address='+encodeURIComponent(p.addr||p.name);
+    const ctrl = new AbortController();
+    const to = setTimeout(()=>ctrl.abort(), 9000);
+    const r = await fetch('api/property?'+q, { signal: ctrl.signal });
+    clearTimeout(to);
+    const j = await r.json().catch(()=>({ ok:false, message:'响应解析失败' }));
+    if(!j.ok) throw new Error(j.message || ('HTTP '+r.status));
+    const d = j.data, filled=[];
+    if(!p.listPrice && d.listPrice){ p.listPrice = d.listPrice; filled.push('挂牌价'); }
+    const sum = [d.beds?d.beds+'卧':null, d.sqft?d.sqft.toLocaleString('en-US')+' sqft':null, d.yearBuilt?'建于'+d.yearBuilt:null].filter(Boolean).join(' · ');
+    if(sum && !/sqft/.test(p.addr||'')){ p.addr = (p.addr||'')+' · '+sum; filled.push('概要'); }
+    if((!p.history||!p.history.length) && d.history && d.history.length){ p.history = d.history; filled.push('成交历史'); }
+    if(d.dom) p.notes = (p.notes?p.notes+'\n':'') + '服务端('+d.source+'):在售 '+d.dom+' 天';
+    if(!filled.length) throw new Error('数据源中无更多可填字段');
+    save(); renderSheet(id);
+    toast('服务端充填:'+filled.join(' / '));
+    maybeAutoAnnotate(id).then(ok=>{ if(ok) renderSheet(id); }).catch(()=>{});
+  }catch(e){
+    if(!silent) toast('服务端充填不可用 —— '+(e.message||''), false);
+  }
+}
+
+/* 自动批注:数据就绪且未批注过时,由页面自动调用已配置的 AI(默认本地 Ollama) */
+function needsAnnotate(p){
+  return !!(p && p.listPrice && (p.factors||[]).every(f=>!f.note) && !(p.notes||'').includes('AI 批注'));
+}
+/* 浏览器内置 AI(Chrome/Edge 138+ Gemini Nano):零安装的本机计算兜底 */
+function chromeLM(){ return (typeof window!=='undefined') && (window.LanguageModel || (window.ai && window.ai.languageModel)) || null; }
+function hasChromeAI(){ return !!chromeLM(); }
+async function chromeAIStatus(){
+  const LM = chromeLM();
+  if(!LM) return 'unsupported';
+  try{ return await LM.availability(); }catch(e){ return 'unavailable'; }
+}
+async function enableChromeAI(){
+  const LM = chromeLM();
+  if(!LM) return toast('此浏览器不支持内置 AI(需 Chrome / Edge 138+)', false);
+  const av = await LM.availability();
+  if(av === 'available') return toast('浏览器内置 AI 已就绪');
+  if(av === 'downloadable'){
+    toast('开始下载浏览器内置模型(一次性,由浏览器管理)…');
+    try{
+      await LM.create({ monitor(m){ m.addEventListener('downloadprogress', ()=>{}); } });
+      toast('浏览器内置 AI 已就绪');
+    }catch(e){ toast('下载未完成 —— '+(e.message||'').slice(0,60), false); }
+  } else toast('浏览器内置 AI 状态:'+av, false);
+}
+/* AI 批注引擎:Ollama/自定义端点(OpenAI 兼容)→ 浏览器内置 AI → 提示配置 */
+async function aiAnnotate(id){
+  const p = getProp(id); if(!p) return;
+  const useChrome = !aiCfg.base && hasChromeAI();
+  if(!aiCfg.base && !useChrome && !aiCfg.key){ toast('未检测到可用 AI —— 本机 Ollama / 浏览器内置 AI / 云端 key 三选一,见「数据」页', false); return; }
+  const m = p.holdYears ? `持有计划:${p.holdYears}年(${holdType(p.holdYears)})` : '持有计划:未设定';
+  const body = {
+    name:p.name, addr:p.addr, listPrice:p.listPrice, m,
+    history:p.history, tiers:p.tiers, comps:(p.comps||[]).map(c=>({addr:c.addr,price:c.price,date:c.date,sqft:c.sqft})),
+    factors:(p.factors||[]).map(f=>f.s), checklistFlags:CHECKLIST.map((c,i)=>((p.checklist||{})[i]==='flag')?c[0]:null).filter(Boolean),
+    metrics:(()=>{ const mm=propMetrics(p); return {dom:mm.dom, cuts:mm.cuts, totalCutsPct:mm.totalCutsPct!=null?+mm.totalCutsPct.toFixed(1):null, relist:mm.relist}; })()
+  };
+  toast('AI 批注中' + (useChrome?'(浏览器内置 AI)':'') + '…');
+  let txt = '';
+  try{
+    if(useChrome){
+      const LM = chromeLM();
+      const av = await LM.availability();
+      if(av !== 'available'){
+        toast(av === 'downloadable'
+          ? '浏览器内置 AI 需一次性下载模型 —— 到「数据」页点「启用浏览器内置 AI」,之后永久免配置'
+          : '浏览器内置 AI 不可用('+av+')', false);
+        return;
+      }
+      const session = await LM.create({ initialPrompts:[{role:'system', content:AI_SYS}], temperature:0.3 });
+      txt = await session.prompt(JSON.stringify(body));
+      try{ session.destroy && session.destroy(); }catch(e){}
+    } else {
+      const base = (aiCfg.base||'https://api.openai.com/v1').replace(/\/+$/,'');
+      const ctrl = new AbortController(); const to = setTimeout(()=>ctrl.abort(), 60000);
+      const r = await fetch(base+'/chat/completions', {
+        method:'POST', signal:ctrl.signal,
+        headers:{'Content-Type':'application/json', ...(aiCfg.key?{Authorization:'Bearer '+aiCfg.key}:{})},
+        body: JSON.stringify({ model: aiCfg.model||'gpt-4o-mini', temperature:0.3,
+          messages:[{role:'system',content:AI_SYS},{role:'user',content:JSON.stringify(body)}] })
+      });
+      clearTimeout(to);
+      if(!r.ok) throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,120));
+      const j = await r.json();
+      txt = j.choices?.[0]?.message?.content || '';
+    }
+    txt = String(txt).replace(/^```(?:json)?/m,'').replace(/```\s*$/m,'').trim();
+    const a = JSON.parse(txt);
+    let n = 0;
+    if(Array.isArray(a.factors) && !p.factors) p.factors = zeroFactors();
+    (a.factors||[]).slice(0,7).forEach((f,i)=>{ if(p.factors[i] && !p.factors[i].note && f && f.note){ p.factors[i].note = String(f.note).slice(0,60); n++; } });
+    const parts = [];
+    if(a.advice) parts.push('💡 ' + a.advice);
+    if(Array.isArray(a.risks) && a.risks.length) parts.push('⚠ 额外风险:\n- ' + a.risks.map(x=>String(x).slice(0,80)).join('\n- '));
+    if(parts.length){ p.notes = '【AI 批注 ' + todayStr() + (useChrome?' · 浏览器内置':'') + '】\n' + parts.join('\n\n') + (p.notes?'\n\n'+p.notes:''); }
+    save(); renderSheet(id);
+    toast('AI 批注完成' + (n?`(补了 ${n} 条维度证据)`:''));
+  }catch(e){
+    toast('AI 批注失败 —— '+(e.message||'').slice(0,90), false);
+  }
+}
+async function maybeAutoAnnotate(id){
+  if(!aiCfg.auto || (!aiReady() && !hasChromeAI())) return false;
+  const p = getProp(id);
+  if(!needsAnnotate(p)) return false;
+  await aiAnnotate(id);
+  return true;
+}
+/* 报告入口:必要时先自动批注,再渲染报告 */
+async function genReport(id){
+  const p = getProp(id); if(!p) return;
+  try{ if(needsAnnotate(p) && aiCfg.auto && (aiReady() || hasChromeAI())) toast('AI 补析中,随后生成报告…'); }catch(e){}
+  try{ await maybeAutoAnnotate(id); }catch(e){}
+  renderReport(id);
+}
+
+/* 挂牌页文本解析(纯函数):书签充填器与粘贴解析共用 */
+function extractFromText(txt){
+  const out = {listPrice:null,beds:null,baths:null,sqft:null,hoa:null,tax:null,built:null,url:null,history:[]};
+  if(!txt) return out;
+  const money = [...txt.matchAll(/\$\s?([\d,]+(?:\.\d+)?)/g)].map(x=>parseFloat(x[1].replace(/,/g,'')));
+  out.listPrice = money.find(v=>v>=50000) ?? null;
+  const grab = re => { const m = txt.match(re); return m ? parseFloat(m[1].replace(/,/g,'')) : null; };
+  out.beds  = grab(/(\d+)\s*(?:bd\b|bed|卧)/i);
+  out.baths = grab(/(\d+(?:\.\d+)?)\s*(?:ba\b|bath|卫)/i);
+  out.sqft  = grab(/([\d,]{3,})\s*(?:sqft|sq\.?\s?ft|平方)/i);
+  out.hoa   = grab(/HOA[^\d\n]{0,24}\$?\s?([\d,]+)/i) || grab(/\$\s?([\d,]{2,6})\s*\/?\s*mo\s*HOA/i);
+  out.tax   = grab(/(?:地税|property tax|annual tax|taxes)[^\d\n]{0,24}\$?\s?([\d,]{3,})/i);
+  if(out.tax!=null && out.tax<=500) out.tax=null;
+  out.built = grab(/(?:year built|built in|建于)[^\d\n]{0,12}(\d{4})/i);
+  out.url   = (txt.match(/https?:\/\/[^\s]*(?:zillow|redfin|realtor)[^\s]*/i)||[])[0] || null;
+  // 价格历史行:"5/27/2026 Listed for sale $995,000" 或 Redfin "September 8, 2026 · Price Change · $849,000"
+  const re = /(\d{1,2}\/\d{1,2}\/\d{4})[ \t]+([A-Za-z][A-Za-z \-]{2,28})[ \t]+\$([\d,]{5,})/g;
+  let mm, seen=new Set();
+  while((mm = re.exec(txt)) && out.history.length<12){
+    const [, d, ev, pr] = mm;
+    if(!/listed|price|sold|pending|removed|contingent|relisted/i.test(ev)) continue;
+    const p = parseInt(pr.replace(/,/g,''));
+    const key = d+'|'+p;
+    if(seen.has(key)) continue; seen.add(key);
+    const [M,D,Y] = d.split('/');
+    out.history.push({date:`${Y}-${M.padStart(2,'0')}-${D.padStart(2,'0')}`, label: ev.replace(/price change/i,'降价').replace(/listed for sale/i,'挂牌').replace(/listed for rent/i,'挂牌出租').replace(/sold/i,'成交').replace(/removed/i,'撤牌').replace(/pending|contingent/i,'待过户').trim(), price:p});
+  }
+  return out;
+}
+/* 挂牌页文本解析:只填空白字段 */
+/* 把解析结果填进房源(只补空白) */
+function applyExtract(p, ex){
+  const filled = [];
+  if(!p.listPrice && ex.listPrice){ p.listPrice = ex.listPrice; filled.push('挂牌价'); }
+  if(!p.hoaMonthly && ex.hoa){ p.hoaMonthly = ex.hoa; filled.push('HOA'); }
+  if(!p.taxAnnual && ex.tax){ p.taxAnnual = ex.tax; filled.push('地税'); }
+  if(!p.srcUrl && ex.url){ p.srcUrl = ex.url; filled.push('来源链接'); }
+  const summary = [ex.beds?ex.beds+'卧':null, ex.baths?ex.baths+'卫':null, ex.sqft?ex.sqft.toLocaleString('en-US')+' sqft':null, ex.built?'建于'+ex.built:null].filter(Boolean).join(' · ');
+  if(summary && !/sqft/.test(p.addr||'')){ p.addr = (p.addr? p.addr.replace(/\s*·\s*(\d+卧|\d+,\d+ sqft).*$/,'')+' · ':'') + summary; filled.push('概要'); }
+  if((!p.history || !p.history.length) && ex.history.length){
+    p.history = ex.history.slice().reverse();
+    filled.push('价格历史('+ex.history.length+'条)');
+  }
+  if(ex.built) p.notes = (p.notes?p.notes+'\n':'') + `解析:建于 ${ex.built}`;
+  return filled;
+}
+function pasteParse(id){
+  const p = getProp(id); if(!p) return;
+  const txt = ($('#pasteBox')||{}).value || '';
+  if(!txt.trim()){ toast('先粘贴挂牌页文字', false); return; }
+  const filled = applyExtract(p, extractFromText(txt));
+  save(); renderSheet(id);
+  if(!filled.length) toast('没有解析到可填的新字段 —— 试试「让 AI 充填」', false);
+  else toast('已填入:' + filled.join(' / '));
+  // 自动批注:数据就绪且开启时,由本机/已配置 AI 补充分析
+  maybeAutoAnnotate(id).then(ok=>{ if(ok) renderSheet(id); }).catch(()=>{});
+}
+
+/* 一键报告:可打印 / 存 PDF */
+function renderReport(id){
+  const p = getProp(id); if(!p) return;
+  const m = propMetrics(p);
+  const st = STATUSES[p.status]||STATUSES[0];
+  const done = Object.values(p.checklist||{}).filter(v=>v==='ok').length;
+  const flags = CHECKLIST.map((c,i)=>((p.checklist||{})[i]==='flag')?c[0]:null).filter(Boolean);
+  const fi = factorInfo(p);
+  const ex = exitScenarios(p);
+  const histRows = p.history.map(h=>`<tr><td>${h.date||''}</td><td>${esc(h.label)}</td><td class="num">${h.price?usd(h.price):'—'}</td></tr>`).join('');
+  const tierRows = p.tiers.map((t,i)=>{
+    const c=(t.price&&p.listPrice)?concession(p.listPrice,t.price,t.creditPct):null;
+    return `<tr><td>${i===0?'<b>起报价</b> · ':''}${esc(t.label)}</td><td class="num">${t.price?usd(t.price):'—'}</td><td class="num">${t.creditPct}%</td><td class="num">${c?usd(c.credit):'—'}</td><td class="num">${c?usd(c.sellerNet):'—'}</td><td class="num"><b>${c?pct1(-c.pct):'—'}</b></td></tr>`;
+  }).join('');
+  const compRows = p.comps.map(c=>`<tr><td>${esc(c.addr)}</td><td class="num">${c.price?usd(c.price):'—'}</td><td>${c.date||''}</td><td class="num">${(c.price&&c.sqft)?'$'+Math.round(c.price/c.sqft):'—'}</td><td>${esc(c.note||'')}</td></tr>`).join('');
+  let loanHtml='';
+  const t1=p.tiers&&p.tiers[0];
+  if(t1 && t1.price && p.rate){
+    const escM=(p.taxAnnual||0)/12+(p.hoaMonthly||0)+(p.insMonthly||0)+(p.pmiMonthly||0);
+    const loan=t1.price*(1-(p.downPct??10)/100);
+    // 报告的 buydown 结构跟随持有期:≤3年用 3-2-1(全周期覆盖),否则 2-1
+    const bdType = (p.holdYears && p.holdYears<=3) ? '3-2-1' : '2-1';
+    const r=buydownSchedule(loan,p.rate,p.term||30,bdType);
+    const c=concession(p.listPrice||t1.price,t1.price,t1.creditPct);
+    const gap = r.fund - c.credit;
+    loanHtml=`<h2 class="sec">${IC.clock} 起报价 Buydown 月供(${bdType})</h2>
+      <div class="card"><table class="t"><thead><tr><th>年份</th><th class="num">利率</th><th class="num">本息</th><th class="num">全包月供</th></tr></thead><tbody>
+      ${r.years.map(y=>`<tr><td>第 ${y.year} 年${y.subsidized?' 🔖':''}</td><td class="num">${y.rate.toFixed(2)}%</td><td class="num">${usd(y.pi)}</td><td class="num">${usd(y.pi+escM)}</td></tr>`).join('')}
+      </tbody></table>
+      <div class="note">贷款 ${usd(loan)} @ 票面 ${p.rate}% / ${p.term||30} 年(首付 ${p.downPct??10}%);${bdType} 资金 ${usd(r.fund)};起报价 credit ${usd(c.credit)}${gap<=0?` ✓ 覆盖后剩 ${usd(-gap)} 可用于过户费`:` —— 缺口 ${usd(gap)},调平三方案(降档 / 价格↔credit 平移 / 自掏)见计算器页`}${p.holdYears&&p.holdYears<=3&&bdType==='3-2-1'?';补贴覆盖整个持有期,票面月供在计划内不发生':''}${bdType==='2-1'&&p.holdYears&&p.holdYears<=5?`;若想覆盖更久:3-2-1 需资金 ${usd(buydownSchedule(loan,p.rate,p.term||30,'3-2-1').fund)},与 credit 差额见计算器调平方案`:''}。</div></div>`;
+  }
+  $('#sheet').innerHTML = `
+    <div class="flex no-print" style="justify-content:space-between;margin-bottom:10px">
+      <button class="btn ghost mini" onclick="renderSheet('${p.id}')">${IC.back} 返回编辑</button>
+      <button class="btn mini" onclick="window.print()">${IC.print} 打印 / 存 PDF</button>
+    </div>
+    <div style="border-bottom:2.5px solid var(--ink);padding-bottom:12px;margin-bottom:16px">
+      <div style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700">购房谈判报告 · Home Deal Report</div>
+      <div style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:2px">${esc(p.name)}</div>
+      <div class="muted" style="font-size:12px">${esc(p.addr||'')}${p.srcUrl?` · <a href="${esc(p.srcUrl)}" target="_blank" rel="noopener" style="color:var(--brand)">来源↗</a>`:''} · 状态:${st[0]} · 生成于 ${todayStr()}</div>
+    </div>
+    <h2 class="sec">${IC.target} 核心指标</h2>
+    <div class="card">
+      <div class="kvrow"><span>当前挂牌价</span><b style="font-size:16px">${usd(p.listPrice)}</b></div>
+      <div class="kvrow"><span>首挂至今 / 当前轮次</span><b>${m.dom!=null?m.dom+' 天':'—'}${m.relist?`(重挂,当前轮 ${m.roundDom} 天)`:''}</b></div>
+      <div class="kvrow"><span>累计降幅(${m.cuts} 次调价)</span><b style="color:var(--warn)">${m.totalCutsPct!=null?pct1(-m.totalCutsPct):'—'}</b></div>
+      <div class="kvrow"><span>持有计划(目标函数)</span><b>${p.holdYears!=null?fmtHold(p.holdYears)+' · '+holdType(p.holdYears):'未设定'}</b></div>
+      <div class="kvrow"><span>HOA / 地税(年)</span><b>${p.hoaMonthly?usd(p.hoaMonthly)+'/月':'—'} · ${p.taxAnnual?usd(p.taxAnnual):'—'}</b></div>
+      <div class="kvrow"><span>尽调进度</span><b>${done}/${CHECKLIST.length}${flags.length?` · ⚠ ${flags.length} 项待深挖`:''}</b></div>
+    </div>
+    <h2 class="sec">${IC.gauge} 房价支撑与持有期分析</h2>
+    <div class="card">
+      <table class="t"><thead><tr><th>维度</th><th class="num">评分</th><th>证据</th></tr></thead><tbody>
+      ${FACTORS.map((F,i)=>`<tr><td><b>${F[1]}</b><div class="muted" style="font-size:11px;font-weight:400">${F[2]}</div></td><td class="num">${scoreBadge(fi.f[i].s)}</td><td style="font-size:12px">${esc(fi.f[i].note)||'—'}</td></tr>`).join('')}
+      </tbody></table>
+      <div class="kvrow mt"><span>综合支撑指数</span><b style="font-size:15px">${fi.sum>0?'+':''}${fi.sum} / +14 <span class="pill ${fi.band[1]}">${fi.band[0]}</span></b></div>
+      <div class="callout info mt"><span>${IC.target}</span><div><b>持有期建议:</b>${fi.advice}</div></div>
+      ${ex?`
+      <h2 class="sec" style="margin-top:16px">${IC.trend} 退出情景测算 <span class="n">按起报价 ${usd(ex.price)} · 持有 ${fmtHold(ex.hold)} · 卖房成本按 6%</span></h2>
+      <table class="t"><thead><tr><th>年化情景</th><th class="num">预计卖价</th><th class="num">剩余贷款</th><th class="num">净回笼</th><th class="num">持有期净成本</th><th class="num">月均</th></tr></thead><tbody>
+      ${ex.rows.map(r=>`<tr><td>${r.g===0?'持平':(r.g>0?'<span style="color:var(--ok)">':'<span style="color:var(--danger)">')+(r.g>0?'+':'')+(r.g*100).toFixed(0)}%/年</span></td><td class="num">${usd(r.sale)}</td><td class="num">${usd(ex.bal)}</td><td class="num">${usd(r.net)}</td><td class="num"><b>${usd(r.cost)}</b></td><td class="num">${usd(r.month)}</td></tr>`).join('')}
+      </tbody></table>
+      <div class="note">贷款 ${usd(ex.price*(1-(p.downPct??10)/100))} @ 票面 ${p.rate}% · 月供本息 ${usd(ex.pi)} · 首付 ${usd(ex.down)}。持有期净成本 = 首付 + 全部月供 − 净回笼,可与同期租金及不同让步幅度下的进场价对照,用于评估持有期限与报价力度。</div>`:''}
+      <div class="note">评分为结构化判断框架(每维 −2~+2),情景为规划假设,不构成价格预测。</div>
+    </div>
+    ${histRows?`<h2 class="sec">${IC.trend} 挂牌历史(议价证据)</h2>
+    <div class="card">${p.history.filter(h=>h.price).length>=2?`<div class="mb">${spark(p.history,680,110,'r'+id)}</div>`:''}
+    <table class="t"><thead><tr><th>日期</th><th>事件</th><th class="num">价格</th></tr></thead><tbody>${histRows}</tbody></table></div>`:''}
+    ${tierRows?`<h2 class="sec">${IC.chev} 谈判阶梯(内部使用)</h2>
+    <div class="card"><table class="t"><thead><tr><th>档位</th><th class="num">合同价</th><th class="num">Credit</th><th class="num">Credit $</th><th class="num">卖方到手*</th><th class="num">总让步</th></tr></thead><tbody>${tierRows}</tbody></table>
+    <div class="note">*未扣佣金与卖方其他费用;卖方合并计算降价与 credit,只看总让步。${holdHint(p)}</div></div>`:''}
+    ${loanHtml}
+    ${compRows?`<h2 class="sec">${IC.home} 参考成交</h2>
+    <div class="card"><table class="t"><thead><tr><th>地址</th><th class="num">成交价</th><th>时间</th><th class="num">$/sqft</th><th>备注</th></tr></thead><tbody>${compRows}</tbody></table></div>`:''}
+    ${flags.length?`<h2 class="sec">${IC.alert} 待深挖疑点</h2><div class="card">${flags.map(f=>`<div class="kvrow"><span>${esc(f)}</span><b style="color:var(--danger)">⚠</b></div>`).join('')}</div>`:''}
+    ${p.notes?`<h2 class="sec">${IC.restore} 备注</h2><div class="card" style="font-size:12.5px;white-space:pre-wrap;line-height:1.7">${esc(p.notes)}</div>`:''}
+    <div class="note" style="margin-top:18px">本报告由选房谈判助手生成,数据来自用户录入与公开挂牌页;计算为谈判规划参考,不构成估值、贷款承诺或投资建议。</div>`;
+}
+function addRow(id, key){  const p = getProp(id);
+  const tpl = {
+    history:{date:todayStr(),label:'',price:null},
+    tiers:{label:'',price:null,creditPct:3},
+    comps:{addr:'',price:null,date:'',beds:null,sqft:null,note:''}
+  }[key];
+  p[key].push({...tpl}); save(); renderSheet(id);
+}
+function rmRow(id, key, i){ const p=getProp(id); p[key].splice(i,1); save(); renderSheet(id); }
+function cycleCheck(id, i){
+  const p = getProp(id);
+  p.checklist = p.checklist||{};
+  const cur = p.checklist[i]||'';
+  p.checklist[i] = cur==='' ? 'ok' : (cur==='ok' ? 'flag' : '');
+  save(); renderSheet(id);
+}
+
+/* ---------------- 计算器 ---------------- */
+let calcState = {propId:'', price:null, downPct:10, rate:7.12, term:30, taxAnnual:null, hoaMonthly:null, insMonthly:100, pmiMonthly:0, buydown:'2-1', creditAmt:null, hold:null, creditCap:6,
+                 qList:null, qOffer:null, qCreditPct:3};
+
+/* Credit ↔ Buydown 调平引擎:有缺口给三方案+推荐,有结余给用法建议 */
+function creditPlanHtml(s, r, loan, escM){
+  if(s.creditAmt==null || s.creditAmt<=0 || !s.price) return '';
+  const NAMES={'none':'固定利率','2-1':'2-1 buydown','3-2-1':'3-2-1 buydown'};
+  const offs={'none':0,'2-1':2,'3-2-1':3}[s.buydown]||0;
+  const gap = r.fund - s.creditAmt;
+  const h = s.hold, cap = s.creditCap??6;
+
+  if(gap<=0){ // 结余:主动给出用法优先级
+    const remain = -gap;
+    let extra='';
+    if(s.buydown==='none'){
+      const f21 = buydownSchedule(loan, s.rate, s.term, '2-1').fund;
+      extra = ` 想压月供:同额 credit 改做 2-1 需资金 ${usd(f21)}${f21<=s.creditAmt?'(可覆盖)':''};短期持有者尤其值得。`;
+    } else if(remain>0){
+      extra = ` 结余用法:短期持有 → 留在 credit 付过户费/预付款;长期持有 → 和卖方谈成降价更值(每 $1 降价 ≈ 30 年利息 $1.4,credit 只值 $1)。`;
+    }
+    const noFund = ' 可全部用于合格成交费用(过户费、预付税款保险、临时 buydown 等)。';
+    return `<div class="callout info"><span>${IC.check}</span><div>Credit ${usd(s.creditAmt)}${r.fund?` 扣除 buydown 资金 ${usd(r.fund)} 后,还剩 <b>${usd(remain)}</b> 可用于其他合格成交费用(过户费、预付税款保险等)。`:noFund}${extra}</div></div>`;
+  }
+
+  // 缺口 gap>0:三个调平方案
+  const P=s.price, d=s.downPct/100, rate=s.rate, term=s.term;
+  const lower={'3-2-1':'2-1','2-1':'none','none':'none'}[s.buydown];
+  // A 降档
+  const rA = buydownSchedule(P*(1-d), rate, term, lower);
+  const offsA={'none':0,'2-1':2,'3-2-1':3}[lower]||0;
+  const coveredA = h!=null && h<=offsA;
+  // B 价格↔credit 平移(卖方到手不变)
+  const P2=P+gap, C2=r.fund, pctB=C2/P2*100;
+  const rB = buydownSchedule(P2*(1-d), rate, term, s.buydown);
+  const capOK = pctB<=cap;
+  const coveredB = h!=null && h<=offs && offs>0;
+
+  let rec=null, why;
+  if(h==null){ why='设定持有年限后,这里会标出推荐方案。'; }
+  else if(h<=offs && offs>0){
+    if(capOK){ rec='B'; why=`推荐 B:持有 ${fmtHold(h)} 全周期覆盖,卖方到手不变(${usd(P-s.creditAmt)}),你不用额外掏现金。注意两点:合同价抬高会略增卖方佣金、并需评估价配合。`; }
+    else { rec='C'; why=`平移后 credit 需 ${pctB.toFixed(2)}%,超过上限 ${cap}% → 推荐 C:自掏 ${usd(gap)} 保全覆盖;若现金流紧张,退而求其次选 A。`; }
+  } else if(offs>0){ rec='A'; why=`持有 ${fmtHold(h)} 超出补贴年数(${offs} 年),买断仅覆盖前 ${offs} 年 → 推荐 A 降档,让步转用于降价或过户费。`; }
+  else { why='当前为固定利率,无 buydown 资金需求。'; }
+
+  const row=(tag,name,o)=>`<tr ${rec===tag?'style="background:var(--brand-soft)"':''}>
+    <td>${rec===tag?`<span class="pill deal">${IC.star.replace('stroke-width="1.8"','stroke-width="2.2"')} 推荐</span> `:''}<b>${name}</b><div class="muted" style="font-weight:400">${o.sub}</div></td>
+    <td class="num">${usd(o.price)}</td>
+    <td class="num">${usd(o.credit)}<div class="muted">${o.pct!=null?o.pct.toFixed(2)+'%':''}</div></td>
+    <td class="num">${o.y1!=null?usd(o.y1):'—'}</td>
+    <td style="font-size:12px">${o.note}</td></tr>`;
+
+  const rows =
+    row('A', lower==='none'?'取消买断':'降为 '+NAMES[lower], {sub:'方案 A · 降档', price:P, credit:s.creditAmt, pct:s.creditAmt/P*100,
+      y1: rA.years[0]?.pi,
+      note: `资金 ${usd(rA.fund)}${rA.fund>0&&rA.fund<s.creditAmt?`,credit 覆盖后剩 ${usd(s.creditAmt-rA.fund)}`:''}${lower==='none'?'':';'}${h==null?'':(coveredA?'<br><span style="color:var(--ok);font-weight:650">✓ 仍全覆盖</span>':`<br>第 ${offsA+1} 年起月供 ${usd(rA.base)}`)}`}) +
+    row('B','价格换 Credit 平移',{sub:'方案 B · 卖方到手不变', price:P2, credit:C2, pct:pctB, y1:rB.years[0]?.pi,
+      note: `缺口 ${usd(gap)} 从价格转入 credit,卖方到手维持 ${usd(P-s.creditAmt)}${capOK?'':`<br><span style="color:var(--danger);font-weight:650">⚠ credit ${pctB.toFixed(2)}% 超上限 ${cap}%</span>`};本金增加 ${usd(gap*(1-d))}`}) +
+    row('C','自掏补足缺口',{sub:'方案 C · 现金前置', price:P, credit:s.creditAmt, pct:s.creditAmt/P*100, y1:r.years[0]?.pi,
+      note: `自己向补贴账户注入 ${usd(gap)};持有期月供减免 = 投入(名义打平、时点前置),换来的是现金流平滑`});
+
+  return `<div class="callout warn"><span>${IC.scale}</span><div>Buydown 需 <b>${usd(r.fund)}</b>,Credit ${usd(s.creditAmt)} 缺口 <b>${usd(gap)}</b> —— 调平方案对比:</div></div>
+    <table class="t mt"><thead><tr><th>调平方案</th><th class="num">合同价</th><th class="num">Credit</th><th class="num">首年本息</th><th>效果与代价</th></tr></thead><tbody>${rows}</tbody></table>
+    ${why?`<div class="callout ${rec?'info':'warn'}"><span>${rec?IC.star:IC.alert}</span><div>${why}</div></div>`:''}
+    <div class="note">方案 B 中卖方到手净额不变;合同价抬高会增加佣金基数并需评估价支持,贷款本金相应增加。Credit 上限 ${cap}% 可在上方修改(常规贷款约 3–6%,以贷款机构为准)。</div>`;
+}
+
+function holdTotals(loan, rate, term, holdYears){
+  const months = Math.round(holdYears*12);
+  const base = pmt(loan, rate, term);
+  const schemes = [['none',[]],['2-1',[2,1]],['3-2-1',[3,2,1]]];
+  return schemes.map(([name,offs])=>{
+    let sum=0, fund=0;
+    for(let m=0;m<months;m++){
+      const yr=Math.floor(m/12)+1;
+      const off=offs[yr-1]||0;
+      const pay = off>0 ? pmt(loan, Math.max(0.0001, rate-off), term) : base;
+      sum+=pay; if(off>0) fund+=base-pay;
+    }
+    return {name, sum, fund, covered: name!=='none' && months<=offs.length*12, beyond: Math.max(0, holdYears-offs.length)};
+  });
+}
+/* 按持有期输出:护栏结论 + 方案对比 + 让步偏好 */
+function holdBlockHtml(loan, s, escM, r){
+  const h=s.hold;
+  if(h==null) return `<div class="callout info"><span>${IC.target}</span><div><b>先设定持有年限</b>——它决定目标函数:补贴是否覆盖全持有期、各方案持有期本息对比、降价与 credit 的偏好,都会随之改变。</div></div>`;
+  const offs={'none':0,'2-1':2,'3-2-1':3}[s.buydown]||0;
+  const baseAll=r.base+escM;
+  let guard;
+  if(offs>0 && h<=offs){
+    guard=`<div class="callout info"><span>${IC.check}</span><div><b>补贴覆盖整个持有期</b>(持有 ${fmtHold(h)} ≤ 补贴 ${offs} 年):票面利率全包月供 <b class="num">${usd(baseAll)}</b> 在计划持有期内<b>不会实际发生</b>。<br>兜底核对:若到期无法出售或再融资不成立,月供将回到上述水平;需确认该情形可承受或再融资路径可行。</div></div>`;
+  } else if(offs>0){
+    const yr=r.years.find(y=>y.year===offs+1)||r.years[r.years.length-1];
+    guard=`<div class="callout warn"><span>${IC.alert}</span><div><b>持有期超出补贴</b>(持有 ${fmtHold(h)} > 补贴 ${offs} 年):第 ${offs+1} 年起全包月供 <b class="num">${usd(yr.pi+escM)}</b>,这部分必须长期可负担。</div></div>`;
+  } else {
+    guard=`<div class="callout info"><span>${IC.clock}</span><div>无 buydown:全期全包月供 <b class="num">${usd(baseAll)}</b>。若为短期持有,评估用 credit 换 2-1 / 3-2-1 的现金流价值(见下表)。</div></div>`;
+  }
+  const NAMES={'none':'固定利率','2-1':'2-1 buydown','3-2-1':'3-2-1 buydown'};
+  const tots=holdTotals(loan, s.rate, s.term, h);
+  const rows=tots.map(t=>{
+    const cur=t.name===s.buydown;
+    const cover = t.name==='none' ? '—' : (t.covered?'<span style="color:var(--ok);font-weight:650">✓ 全覆盖</span>':`超出补贴 ${fmtHold(t.beyond)}`);
+    const save = t.name==='none' ? '基准' : (tots[0].sum-t.sum>0 ? '<span style="color:var(--ok);font-weight:650">省 '+usd(tots[0].sum-t.sum)+'</span>' : '+ '+usd(t.sum-tots[0].sum));
+    return `<tr ${cur?'style="background:var(--brand-soft)"':''}><td>${NAMES[t.name]}${cur?' <span class="pill offer">当前</span>':''}</td><td class="num">${usd(t.sum)}</td><td class="num">${t.fund?usd(t.fund):'—'}</td><td>${cover}</td><td class="num">${save}</td></tr>`;
+  }).join('');
+  const pref = h<=5
+    ? `短期持有(${fmtHold(h)}):等额让步优先转换为 credit/buydown —— 每 $1 转换为持有期月供减免约 $1,转为降价 3 年仅减约 $0.24(降价价值体现在退出净值)。`
+    : `长期持有(${fmtHold(h)}):等额让步优先转换为降价 —— 每 $1 降价约减少 30 年利息 $1.4(7% 量级);credit 仅等于头几年的 $1。`;
+  return `${guard}
+    <table class="t mt"><thead><tr><th>持有 ${fmtHold(h)} 方案对比</th><th class="num">本息合计</th><th class="num">需补贴资金</th><th>覆盖情况</th><th class="num">vs 固定</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    <div class="note">本息合计 = 持有期内全部月供之和(不含税/保险/HOA,三方案这部分相同)。${pref}</div>`;
+}
+
+function renderCalc(){
+  const opts = ['<option value="">— 独立使用 —</option>']
+    .concat(db.properties.map(p=>`<option value="${p.id}" ${calcState.propId===p.id?'selected':''}>${esc(p.name)}</option>`)).join('');
+  const s = calcState;
+  const loan = s.price&&s.downPct!=null ? s.price*(1-s.downPct/100) : null;
+  const escMonthly = (s.taxAnnual||0)/12 + (s.hoaMonthly||0) + (s.insMonthly||0) + (s.pmiMonthly||0);
+  let bdHtml = '';
+  if(loan){
+    const r = buydownSchedule(loan, s.rate, s.term, s.buydown);
+    const yearCards = r.years.map(y=>`<div class="ycard ${y.subsidized?'sub':''}">
+        <div class="yl"><span>第 ${y.year} 年</span>${y.subsidized?`<span class="yr">🔖 ${y.rate.toFixed(2)}%</span>`:`<span class="num" style="color:var(--ink-3);font-weight:600">${y.rate.toFixed(2)}%</span>`}</div>
+        <div class="pi">${usd(y.pi)}</div>
+        <div class="ai">全包 ${usd(y.pi+escMonthly)}/月</div>
+      </div>`).join('');
+    let creditLine = creditPlanHtml(s, r, loan, escMonthly);
+    bdHtml = `
+      <div class="calc-hero">
+        <div class="lbl">贷款金额 · ${100-s.downPct}% LTV</div>
+        <div class="big">${usd(loan)}</div>
+        <div class="years">${yearCards}</div>
+        <div class="mt" style="display:flex;gap:16px;flex-wrap:wrap">
+          <div><div class="lbl">票面基准月供</div><div style="font-size:16px;font-weight:700" class="num">${usd(r.base)}<span class="muted" style="font-weight:500"> · ${s.rate}% / ${s.term}年</span></div></div>
+          <div><div class="lbl">Buydown 补贴资金</div><div class="num" style="font-size:16px;font-weight:700;${r.fund?'':'opacity:.4'}">${usd(r.fund)}</div></div>
+          <div><div class="lbl">税费+HOA+保险+PMI</div><div style="font-size:16px;font-weight:700" class="num">${usd(escMonthly)}/月</div></div>
+        </div>
+        ${creditLine}
+      </div>
+      ${holdBlockHtml(loan, s, escMonthly, r)}
+      <div class="note">全包月供 = 本息 + 地税/月 + HOA + 保险 + PMI,不含水电、维修与特别分摊。🔖 = 补贴年份,卖方出资存入补贴账户按月补差;无论持有多久,贷款机构一律按<b>票面利率</b>审核还款能力。</div>`;
+  }
+  const q = (s.qList&&s.qOffer) ? concession(s.qList, s.qOffer, s.qCreditPct) : null;
+
+  $('#main').innerHTML = `
+    <div class="page-head">
+      <div><h1>计算器</h1><div class="sub">Buydown 月供 · Credit 覆盖 · 让步速查</div></div>
+    </div>
+    <div class="card">
+      <div class="row">
+        <div class="field"><label class="f">绑定房源(自动带出阶梯与费率)</label>
+          <select id="c-prop">${opts}</select></div>
+        <div class="field"><label class="f">Buydown 类型</label>
+          <div class="seg" id="c-bd">
+            <button data-v="none" class="${s.buydown==='none'?'on':''}">固定</button>
+            <button data-v="2-1" class="${s.buydown==='2-1'?'on':''}">2-1</button>
+            <button data-v="3-2-1" class="${s.buydown==='3-2-1'?'on':''}">3-2-1</button>
+          </div></div>
+      </div>
+      <div class="row">
+        <div class="field" style="flex:0 1 150px"><label class="f">持有年限 ${s.hold!=null?`· ${holdType(s.hold)}`:''}</label>
+          <input type="number" inputmode="decimal" min="0.5" step="0.5" id="c-hold" value="${s.hold??''}" placeholder="年"></div>
+        <div class="field"><label class="f">目标函数 · 快速设定</label>
+          <div class="seg" id="holdSegC">${[3,4,5,10,30].map(n=>`<button data-v="${n}" class="${s.hold===n?'on':''}">${n}年</button>`).join('')}</div></div>
+      </div>
+      <div class="row">
+        <div class="field"><label class="f">合同价 $</label><input type="number" inputmode="decimal" id="c-price" value="${s.price??''}"></div>
+        <div class="field"><label class="f">首付 %</label><input type="number" inputmode="decimal" id="c-down" value="${s.downPct}"></div>
+        <div class="field"><label class="f">票面利率 %</label><input type="number" inputmode="decimal" step="0.01" id="c-rate" value="${s.rate}"></div>
+        <div class="field"><label class="f">年限</label><select id="c-term"><option ${s.term===30?'selected':''}>30</option><option ${s.term===15?'selected':''}>15</option></select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label class="f">地税 $/年</label><input type="number" inputmode="decimal" id="c-tax" value="${s.taxAnnual??''}"></div>
+        <div class="field"><label class="f">HOA $/月</label><input type="number" inputmode="decimal" id="c-hoa" value="${s.hoaMonthly??''}"></div>
+        <div class="field"><label class="f">保险 $/月</label><input type="number" inputmode="decimal" id="c-ins" value="${s.insMonthly??''}"></div>
+        <div class="field"><label class="f">PMI $/月</label><input type="number" inputmode="decimal" id="c-pmi" value="${s.pmiMonthly??0}"></div>
+        <div class="field"><label class="f">Seller credit $</label><input type="number" inputmode="decimal" id="c-credit" value="${s.creditAmt??''}" placeholder="用于覆盖 buydown"></div>
+        <div class="field" style="max-width:104px"><label class="f">上限 %</label><input type="number" inputmode="decimal" step="0.5" id="c-cap" value="${s.creditCap??6}"></div>
+      </div>
+      ${bdHtml || '<div class="empty" style="padding:24px"><div class="t">填写合同价后自动计算</div></div>'}
+    </div>
+
+    <h2 class="sec">${IC.trend} 让步速查 <span class="n">降价 vs credit,卖方只看总让步</span></h2>
+    <div class="card">
+      <div class="row">
+        <div class="field"><label class="f">挂牌价 $</label><input type="number" inputmode="decimal" id="q-list" value="${s.qList??''}"></div>
+        <div class="field"><label class="f">Offer 价 $</label><input type="number" inputmode="decimal" id="q-offer" value="${s.qOffer??''}"></div>
+        <div class="field" style="max-width:110px"><label class="f">Credit %</label><input type="number" inputmode="decimal" step="0.5" id="q-creditpct" value="${s.qCreditPct}"></div>
+      </div>
+      ${q?`<div class="mt">
+        <div class="kvrow"><span>Credit 金额</span><b>${usd(q.credit)}</b></div>
+        <div class="kvrow"><span>卖方到手(价 − credit)*</span><b>${usd(q.sellerNet)}</b></div>
+        <div class="kvrow"><span>相对挂牌价总让步</span><b style="font-size:15px;color:${q.pct>9?'var(--ok)':(q.pct<0?'var(--danger)':'inherit')}">${pct1(-q.pct)}</b></div>
+      </div>
+      <div class="note">*未扣佣金与卖方其他费用。注意事项:①credit 金额不等同于净节省——合同价、首付与贷款本金同步上升;②credit 不可用于首付,额度受贷款产品与 LTV 限制(jumbo 通常更严)。</div>`:''}
+    </div>`;
+  bindCalc();
+}
+function bindCalc(){
+  const s = calcState;
+  $('#c-prop').addEventListener('change', e=>{
+    s.propId = e.target.value;
+    const p = getProp(s.propId);
+    if(p){
+      s.price = p.tiers?.[0]?.price || p.listPrice; s.downPct = p.downPct??10; s.rate = p.rate??7.12; s.term = p.term??30;
+      s.taxAnnual = p.taxAnnual; s.hoaMonthly = p.hoaMonthly; s.insMonthly = p.insMonthly??100; s.pmiMonthly = p.pmiMonthly??0;
+      if(p.holdYears!=null) s.hold = p.holdYears;
+      const t = p.tiers?.[0]; if(t?.price) s.creditAmt = Math.round(concession(p.listPrice||t.price, t.price, t.creditPct).credit);
+    }
+    renderCalc();
+  });
+  const map = {'#c-price':'price','#c-down':'downPct','#c-rate':'rate','#c-tax':'taxAnnual','#c-hoa':'hoaMonthly','#c-ins':'insMonthly','#c-pmi':'pmiMonthly','#c-credit':'creditAmt','#c-cap':'creditCap','#q-list':'qList','#q-offer':'qOffer','#q-creditpct':'qCreditPct'};
+  Object.entries(map).forEach(([sel,key])=>{
+    $(sel).addEventListener('input', e=>{ s[key] = e.target.value===''?null:parseFloat(e.target.value); renderCalc(); });
+  });
+  $('#c-term').addEventListener('change', e=>{ s.term = parseInt(e.target.value); renderCalc(); });
+  $('#c-hold').addEventListener('input', e=>{ s.hold = e.target.value===''?null:parseFloat(e.target.value); renderCalc(); });
+  $$('#c-bd button').forEach(b=>b.addEventListener('click',()=>{ s.buydown = b.dataset.v; renderCalc(); }));
+  $$('#holdSegC button').forEach(b=>b.addEventListener('click',()=>{ s.hold = parseFloat(b.dataset.v); renderCalc(); }));
+}
+
+/* ---------------- 守则 ---------------- */
+function renderPlay(){
+  const rules = [
+    ['先试探,后加码','起报价偏强硬:约 8–10% 总让步 + 3% seller credit 是常见起点。它表达的是诚意结构(能成交的报价),不是你认为的房子价值。'],
+    ['内部分档,绝不透露','起报价 / 第一档调整 / 重点争取 / 重新评估——四档只存在你自己心里,不告诉卖家,更不按顺序自动加价。'],
+    ['出价前必问四件事','完整 MLS 历史(换牌重挂?撤牌原因?)· 有无书面报价 · 卖方交割时间偏好 · 同项目其他单元成交。答案决定你的档位敢压多低。'],
+    ['用凭据支撑低价','施工许可与验收记录、保修文件、condo 预算与储备金、地税是否核定——拿文件说话,不凭空指认"房屋有缺陷"。'],
+    ['低价 offer 配交割可信度','真实预批函 + 资金证明 + 配合卖方交割日期 + 快速验房。卖方愿为"更可靠、更合时间"的交易让价,不是为口头诚意。'],
+    ['保留保护条款','融资、估值、验房(及 condo 文件审查)保护要保留——砍价砍的是价格,不是自己的退路。'],
+    ['等实质反价,不自己加价','卖方回复"太低"但无反价、无新信息 → 不追价。可接受交易破裂是价格上限有效的前提,代价是可能买不到。'],
+    ['每次只动一次,且带交换','每次调整仅一次,并附交换条件(交割日期、验房节奏、credit 结构)。先确认卖方优先项:合同价、补贴额度或交割时间。'],
+    ['上限跟着持有期走','先确定持有年限,再定底线。短期(≤5年):持有期现金流 + 兜底情形(无法出售/再融资不成)的票面月供;长期(≥10年):票面利率全包月供。依赖第一年低月供才能成立的交易不满足负担标准。'],
+    ['把"总让步"当唯一语言','卖方合并计算降价与 credit。统一比较 <code class="k">总让步% = (挂牌价−(合同价−credit)) ÷ 挂牌价</code>,不同报价结构据此对齐。'],
+  ];
+  const asks = [
+    ['完整 MLS 历史','是否换地址/换牌重新挂牌?撤牌原因?有没有签约后退出?14 天"新上市"可能掩盖 110 天真实在售。'],
+    ['有无书面报价','有几个正在谈的买家?看房人数 ≠ 报价数量。'],
+    ['卖方交割时间偏好','不要假设开发商急着回款——找出真实时间需求,它本身就是筹码。'],
+    ['同项目其他单元','兄弟单元的成交价、credit、户型差异,比跨街区参考更有力。'],
+  ];
+  const credits = [
+    'Credit 只能覆盖<b>合格的成交费用</b>(过户费、预付税款保险、临时 buydown 等),<b>不能付首付</b>。',
+    '额度受贷款产品与 LTV 限制:常规贷款通常最高 3–6%,<b>jumbo 通常更严</b>;6% 不是默认可用的。',
+    '临时 buydown 需贷款机构支持,且按<b>完整票面利率</b>审核还款能力——第一年的低月供不改变你的审批门槛。',
+    '先确定持有期再选 buydown:<b>3-2-1 仅在持有期 ≤3 年时实现全周期覆盖</b>;长期持有时其成本由更高合同价承担。',
+    '3-2-1 的补贴资金约为 2-1 的两倍,3% credit 通常不足以单独覆盖。缺口处理:降档 / 价格↔credit 平移 / 自掏补足,计算器按持有期给出推荐。',
+    '卖方将降价与 credit 合并计算总让步——价与 credit 的组合可以谈,但总让步才是卖方真正看的数字。',
+  ];
+  $('#main').innerHTML = `
+    <div class="page-head">
+      <div><h1>谈价守则</h1><div class="sub">从一次真实砍价复盘中沉淀的方法论</div></div>
+    </div>
+    <h2 class="sec">${IC.target} 第 0 问 · 这套房打算住几年?</h2>
+    <div class="card">
+      <p class="muted" style="font-size:12.5px;margin-bottom:12px">持有期限决定<b>目标函数</b>与全部策略参数:</p>
+      <table class="t">
+        <thead><tr><th></th><th>短期持有 ≤5 年</th><th>长期持有 ≥10 年</th></tr></thead>
+        <tbody>
+          <tr><td><b>目标函数</b></td><td>持有期现金流 + 退出流动性</td><td>票面利率月供 + 30 年总利息</td></tr>
+          <tr><td><b>让步形式偏好</b></td><td style="color:var(--ok)"><b>credit / buydown</b>:每 $1 让步 ≈ 持有期 $1 月供减免,不增加本金</td><td style="color:var(--ok)"><b>降价</b>:每 $1 降价约省 30 年利息 $1.4(7% 量级)</td></tr>
+          <tr><td><b>月供底线</b></td><td>补贴覆盖期月供 + <b>兜底情形</b>(卖不掉/再融资不成)的票面月供</td><td>票面利率全包月供必须直接可负担</td></tr>
+          <tr><td><b>buydown 选择</b></td><td>3-2-1 可实现全周期覆盖,票面月供在计划内不发生</td><td>2-1 仅覆盖前两年;长期持有时不应为买断支付更高合同价</td></tr>
+          <tr><td><b>主要风险</b></td><td>退出时市场转冷、卖不掉;再融资利率不降</td><td>利率锁在高位的长期成本</td></tr>
+        </tbody>
+      </table>
+      <div class="note">在房源详情「基本信息」与计算器「持有年限」设定后,阶梯提示与护栏结论按目标函数自动切换;详情页「房价支撑分析」的七维评分与报告页的退出情景,构成持有年限决策的数据依据。</div>
+    </div>
+
+    <h2 class="sec">${IC.alert} 出价前必问四件事</h2>
+    <div class="card"><div class="play">${asks.map((a,i)=>`<div class="rule"><div><div class="rt">Q${i+1} · ${a[0]}</div><div class="rd">${a[1]}</div></div></div>`).join('')}</div>
+      <div class="note">以上问题由买方经纪人向卖方确认;未确认前,报价档位缺乏依据。</div></div>
+
+    <h2 class="sec">${IC.home} 谈价十条守则</h2>
+    <div class="card"><div class="play">${rules.map(r=>`<div class="rule"><div><div class="rt">${r[0]}</div><div class="rd">${r[1]}</div></div></div>`).join('')}</div></div>
+
+    <h2 class="sec">${IC.clock} Seller Credit & Buydown 五个注意</h2>
+    <div class="card"><div class="play">${credits.map(c=>`<div class="rule"><div><div class="rd" style="font-size:13px;color:var(--ink)">${c}</div></div></div>`).join('')}</div></div>
+
+    <h2 class="sec">${IC.chev} 完整流程</h2>
+    <div class="card"><div class="flow">
+      <div class="step"><div class="dot">1</div><div>录入房源,设定<b>持有计划(短期/长期)</b>,补全<b>挂牌历史</b></div></div><div class="connector"></div>
+      <div class="step"><div class="dot">2</div><div>跑<b>尽调清单</b>、问四件事、收集 comps</div></div><div class="connector"></div>
+      <div class="step"><div class="dot">3</div><div>按<b>目标函数</b>定谈判阶梯与 buydown(短期换现金流,长期压总价),算清月供</div></div><div class="connector"></div>
+      <div class="step"><div class="dot">4</div><div>出价:完整 offer + 预批 + 资金证明</div></div><div class="connector"></div>
+      <div class="step"><div class="dot">5</div><div>等反价,<b>一次一换,不追价</b></div></div><div class="connector"></div>
+      <div class="step"><div class="dot">6</div><div>更新状态,复盘存档</div></div>
+    </div></div>`;
+}
+
+/* ---------------- 数据 ---------------- */
+async function updateChromeAIStatus(){
+  const el = $('#chrome-ai-status'); if(!el) return;
+  const s = await chromeAIStatus();
+  el.textContent = s==='available' ? '浏览器内置 AI ✓ 可用(零安装,本机运行)' :
+    s==='downloadable' ? '支持,模型待下载(点左侧按钮一次性启用)' :
+    s==='downloading' ? '模型下载中…' :
+    s==='unsupported' ? '当前浏览器不支持(Chrome / Edge 138+ 支持)' :
+    ('不可用:' + s);
+}
+function renderData(){
+  $('#main').innerHTML = `
+    <div class="page-head">
+      <div><h1>数据</h1><div class="sub">本机存储 · 备份与恢复 · 部署指南</div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card">
+        <h2 class="sec" style="margin-top:0">${IC.down} 导出 / 导入</h2>
+        <p class="muted mb" style="font-size:12.5px">数据只存在本机浏览器。换设备、换浏览器,或清理缓存前,请先导出备份。</p>
+        <div class="flex">
+          <button class="btn" onclick="exportDb()">${IC.down} 导出 JSON 备份</button>
+          <label class="btn ghost" style="cursor:pointer">${IC.up} 导入 JSON<input type="file" accept=".json,application/json" style="display:none" onchange="importDb(this)"></label>
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="sec" style="margin-top:0">${IC.restore} 示例与重置</h2>
+        <p class="muted mb" style="font-size:12.5px">示例案例来自真实谈判复盘(52 Lewis 重挂牌案、顶层翻新 Condo 案),可作模板参考。</p>
+        <div class="flex">
+          <button class="btn soft" onclick="restoreSeed()">${IC.restore} 恢复示例案例</button>
+          <button class="btn danger" onclick="wipe()">${IC.trash} 清空全部数据</button>
+        </div>
+      </div>
+    </div>
+    <div class="card mt">
+      <h2 class="sec" style="margin-top:0">${IC.up} 变成网站 / 安装成 App</h2>
+      <p class="muted" style="line-height:1.9;font-size:12.5px">
+      本应用为零依赖单文件(index.html),三种用法:<br>
+      <b>① 本地直接用</b> —— 双击 index.html 在浏览器打开,数据自动保存在本地;<br>
+      <b>② 部署成网站</b> —— 把整个文件夹拖到 <code class="k">netlify.com/drop</code>,或推到 GitHub 开 Pages,或 <code class="k">vercel deploy</code>,即得一个可访问的网址;<br>
+      <b>③ 装成 App</b> —— 手机浏览器打开部署后的网址,iOS Safari「分享 → 添加到主屏幕」/ Android Chrome「安装应用」,以全屏 App 形式运行(已含 PWA manifest)。</p>
+    </div>
+    <div class="card mt">
+      <h2 class="sec" style="margin-top:0">${IC.star} AI 批注(可选)</h2>
+      <p class="muted mb" style="font-size:12.5px">数字类分析(阶梯/buydown/退出情景/调平)均在本地计算,不联网。AI 批注引擎按顺序自动选择:<b>① 本机 Ollama(自动探测)→ ② 浏览器内置 AI(Chrome/Edge 138+,零安装)→ ③ 下方手动配置的端点</b>。密钥仅存本机。</p>
+      <div class="flex mb" style="gap:8px">
+        <button class="btn ghost mini" onclick="enableChromeAI()">${IC.star} 启用/检查浏览器内置 AI</button>
+        <span class="muted" id="chrome-ai-status">检测中…</span>
+      </div>
+      <div class="row">
+        <div class="field" style="flex:2"><label class="f">API Base(OpenAI 兼容)</label><input id="ai-base" placeholder="https://api.openai.com/v1 或 http://localhost:11434/v1 (Ollama)" value="${esc(aiCfg.base||'')}"></div>
+        <div class="field" style="flex:2"><label class="f">API Key(本机 Ollama 可留空)</label><input id="ai-key" type="password" placeholder="sk-…(只存本机)" value=""></div>
+        <div class="field" style="flex:1"><label class="f">模型</label><input id="ai-model" placeholder="gpt-4o-mini" value="${esc(aiCfg.model||'')}"></div>
+      </div>
+      <div class="flex">
+        <button class="btn" onclick="saveAiUI()">${IC.check} 保存</button>
+        <button class="btn ghost" onclick="detectLocalAI(true)">${IC.restore} 探测本机 Ollama</button>
+        <span class="muted" id="ai-status">${aiReady()?'已配置 ✓':'未配置 —— 若本机装有 Ollama,打开页面时会自动探测'}</span>
+      </div>
+      <label class="flex" style="gap:7px;font-size:12.5px;margin-top:10px;cursor:pointer;user-select:none"><input type="checkbox" id="ai-auto" style="width:auto" ${aiCfg.auto!==false?'checked':''}><span>自动批注:数据充填完成或生成报告前,自动调用已配置的 AI 补充七维证据与建议(每房源一次)</span></label>
+      <div class="note">支持任意 OpenAI 兼容端点;本地部署可使用 Ollama(<code class="k">http://localhost:11434/v1</code>,模型如 <code class="k">qwen2.5:7b</code>)。<br>HTTPS 站点(如线上版)访问本机 Ollama 需一次性放行来源:macOS <code class="k">launchctl setenv OLLAMA_ORIGINS "*"</code> 后重启 Ollama;Windows <code class="k">setx OLLAMA_ORIGINS "*"</code> 后重启。Safari 可能拦截 https→localhost 请求,建议 Chrome/Edge 或本地运行本应用。</div>
+    </div>
+    <div class="card mt">
+      <h2 class="sec" style="margin-top:0">${IC.star} 书签充填器</h2>
+      <p class="muted mb" style="font-size:12.5px">在房源页点击书签,通过当前浏览器会话提取页面数据(价格/卧卫/面积/HOA/地税/价格历史)并导入本应用。无需服务器与 API,不依赖外部抓取。</p>
+      <div style="text-align:center;padding:14px;border:2px dashed var(--line-strong);border-radius:var(--r-md);margin-bottom:10px">
+        <a class="btn" style="text-decoration:none;cursor:grab;padding:12px 22px;font-size:14px" href="${bookmarkletHref()}" onclick="event.preventDefault();toast('请把这个按钮拖到浏览器书签栏(不要点击)')">🏠 抓取并发送到 App</a>
+        <div class="muted mt" style="font-size:11.5px">↑ 按住拖到书签栏(桌面)。iOS Safari:长按 → 收藏 → 编辑地址;Android Chrome:星标 → 编辑。</div>
+      </div>
+      <p class="muted" style="font-size:12px;line-height:1.8">用法:在 Zillow/Redfin 房源页点击该书签 → 新标签打开本应用并自动充填(仅补充空白字段)。书签指向安装时的应用地址(${/^https?:$/.test(location.protocol)?location.origin:'未部署时默认线上版'})。</p>
+    </div>
+    <div class="card mt">
+      <h2 class="sec" style="margin-top:0">${IC.alert} MLS 数据接入</h2>
+      <p class="muted" style="line-height:1.9;font-size:12.5px">
+      MLS / IDX 数据仅向持牌经纪与授权数据商开放。可用数据来源:<br>
+      <b>① AI 辅助导入</b> —— 将房源链接交由 AI 助手按下方 schema 生成 JSON,在本页导入;<br>
+      <b>② 经纪人导出</b> —— 买方经纪可从 MLS 导出完整挂牌历史与成交参考(含 credit 信息,覆盖度高于公开页面);<br>
+      <b>③ 数据商 API</b> —— RentCast / ATTOM 等提供地址级数据(订阅制,经 serverless 代理调用,api/property.js 已内置)。</p>
+      <details style="margin-top:10px">
+        <summary style="cursor:pointer;font-size:12.5px;font-weight:650;color:var(--brand-ink)">给 AI 的导入 schema 示例(点击展开)</summary>
+        <pre class="mt" style="background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:11px;overflow-x:auto;line-height:1.6">{
+  "properties": [{
+    "name": "52 Lewis Ave",
+    "addr": "Arlington, MA · 4卧 · 2,308 sqft",
+    "listPrice": 1259000,
+    "hoaMonthly": 215, "taxAnnual": null,
+    "holdYears": 3,
+    "srcUrl": "https://www.zillow.com/homedetails/...",
+    "history": [
+      {"date":"2026-06-04","label":"挂牌","price":1399000},
+      {"date":"2026-09-18","label":"降价","price":1259000}
+    ],
+    "tiers": [ {"label":"偏强硬起报价","price":1150000,"creditPct":3} ],
+    "factors": [ {"s":1,"note":"学区 9/10"}, {"s":1,"note":""}, {"s":0,"note":""}, {"s":-2,"note":"同楼盘3套在售"}, {"s":-1,"note":"90天0降价"}, {"s":0,"note":""}, {"s":-1,"note":"地税未核定"} ],
+    "comps": [ {"addr":"34 Lewis","price":1175000,"date":"2025-09","beds":4,"sqft":2748,"note":""} ],
+    "checklist": {}, "notes": "AI 补充的挂牌页情报…"
+  }]
+}</pre>
+      </details>
+    </div>`;
+  updateChromeAIStatus();
+}
+function saveAi(){
+  const base=$('#ai-base'), key=$('#ai-key'), model=$('#ai-model');
+  if(base) updateChromeAIStatus();
+  if(!base) return;
+  aiCfg.base = base.value.trim() || null;
+  const k = key.value.trim();
+  if(k) aiCfg.key = k;               // 留空 = 保留旧 key
+  aiCfg.model = model.value.trim() || null;
+  const auto = $('#ai-auto');
+  if(auto) aiCfg.auto = auto.checked;
+  saveAiCfg();
+  $('#ai-status').textContent = aiReady() ? '已配置 ✓' : '未配置 —— 若本机装有 Ollama,打开页面时会自动探测';
+  toast('AI 配置已保存(仅存本机)');
+}
+function exportDb(){
+  const blob = new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `home-deal-coach-${todayStr()}.json`; a.click(); URL.revokeObjectURL(a.href);
+}
+function importDb(input){
+  const f = input.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const d = JSON.parse(r.result);
+      if(!Array.isArray(d.properties)) throw 0;
+      if(confirm(`导入 ${d.properties.length} 套房源,覆盖当前全部数据?`)){ db = d; save(); }
+    }catch(e){ toast('文件格式不正确,导入失败', false); }
+  };
+  r.readAsText(f);
+}
+function restoreSeed(){
+  const seed = seedDb();
+  let added = 0;
+  seed.properties.forEach((p,i)=>{
+    if(db.properties.some(x=>x.seed&&x.name===p.name)) return;
+    p.id = p.id+'-'+Date.now()+i; db.properties.push(p); added++;
+  });
+  save();
+}
+function wipe(){
+  if(!confirm('清空全部房源数据?建议先导出备份。')) return;
+  db = {properties:[]}; save();
+}
+
+/* ---------------- 书签充填器(永久免费):用你自己的浏览器会话取数 ---------------- */
+function bookmarkletHref(){
+  const app = /^https?:$/.test(location.protocol) ? location.origin + location.pathname : 'https://home-deal-coach.vercel.app/';
+  const code = `(function(){try{var t=document.body.innerText;var p={srcUrl:location.href,title:document.title,raw:t.slice(0,24000)};var s=btoa(unescape(encodeURIComponent(JSON.stringify(p))));var u=${JSON.stringify(app)}+'#hdc='+encodeURIComponent(s);var w=window.open(u,'_blank');if(!w)location.href=u;}catch(e){alert('extract failed:'+e.message)}})()`;
+  return 'javascript:' + encodeURIComponent(code);
+}
+function handleHashImport(){
+  const m = location.hash.match(/#hdc=(.+)/);
+  if(!m) return;
+  try{
+    const json = decodeURIComponent(escape(atob(decodeURIComponent(m[1]))));
+    const pl = JSON.parse(json);
+    history.replaceState(null, '', location.pathname);
+    const d = parseListingInput(pl.srcUrl||'');
+    let prop = (pl.srcUrl && db.properties.find(x => x.srcUrl === pl.srcUrl)) || null;
+    if(!prop){
+      const title = (pl.title||'').split('|')[0].replace(/ - Zillow.*| for sale.*$/,'').trim();
+      newProp({name: title || d.addr, addr: d.addr, srcUrl: pl.srcUrl});
+      prop = db.properties[0];
+    }
+    const filled = applyExtract(prop, extractFromText(pl.raw||''));
+    save(); openProp(prop.id);
+    toast(filled.length ? '书签充填完成:' + filled.join(' / ') : '书签充填:档案已打开(未解析到新字段)');
+    maybeAutoAnnotate(prop.id).then(()=>{}).catch(()=>{});
+  }catch(e){
+    toast('书签数据导入失败:'+(e.message||''), false);
+  }
+}
+
+/* ---------------- 用户自带 AI(可选):叙述类批注走用户自己的 key / 本地模型 ---------------- */
+let aiCfg = (()=>{ try{ return JSON.parse(localStorage.getItem('hdc-ai'))||{}; }catch(e){ return {}; } })();
+function saveAiCfg(){ localStorage.setItem('hdc-ai', JSON.stringify(aiCfg)); }
+function aiReady(){ return !!aiCfg.base || !!aiCfg.key; }
+/* 自动探测本机 Ollama(仅未手动配置时);成功则自动启用 */
+async function detectLocalAI(manual){
+  if(!/^https?:$/.test(location.protocol)) return false;
+  try{
+    const ctrl = new AbortController(); const to = setTimeout(()=>ctrl.abort(), 1800);
+    const r = await fetch('http://localhost:11434/v1/models', {signal: ctrl.signal});
+    clearTimeout(to);
+    const j = await r.json();
+    const ids = (j.data||[]).map(m=>m.id);
+    const prefer = ['qwen2.5:7b','qwen2.5:3b','qwen2.5-coder:7b','llama3.2','mistral:latest','gemma2'];
+    const model = prefer.find(p=>ids.includes(p)) || ids.find(i=>!/bge|embed/i.test(i));
+    if(!model) throw new Error('no model');
+    if(!aiCfg.base){
+      aiCfg.base = 'http://localhost:11434/v1'; aiCfg.model = model;
+      if(aiCfg.auto === undefined) aiCfg.auto = true;
+      saveAiCfg();
+    }
+    if(manual) toast('已连接本机 Ollama:' + (aiCfg.model||model) + ' · AI 批注可用');
+    return true;
+  }catch(e){
+    if(manual) toast('未探测到本机 Ollama —— 见「数据」页 AI 配置卡说明', false);
+    return false;
+  }
+}
+const AI_SYS = '你是严谨的购房谈判分析师。基于用户给的结构化数据,只输出 JSON(无其他文字、无代码块标记),格式:{"factors":[{"note":"≤25字的具体证据或判断"}共7个,顺序:学区,位置交通,房屋品质,同区供给,需求信号,利率敏感度,持有成本],"advice":"120字内:结合持有年限的谈判与买断建议","risks":["≤3条该房源特有的额外风险"]}';
+
+/* ---------------- 导航 ---------------- */
+let tab = 'board';
+function render(){
+  const n = db.properties.length;
+  const hc=$('#hcount'), hcm=$('#hcount-m');
+  if(hc) hc.textContent = n? n+' 套':'空';
+  if(hcm) hcm.textContent = n? n+' 套在追':'空看板';
+  ({board:renderBoard, calc:renderCalc, play:renderPlay, data:renderData})[tab]();
+}
+$$('.nav-item[data-tab],.dock button').forEach(b=>b.addEventListener('click',()=>{
+  if(!b.dataset.tab) return;
+  tab = b.dataset.tab;
+  $$('.nav-item[data-tab]').forEach(x=>x.classList.toggle('on',x.dataset.tab===tab));
+  $$('.dock button').forEach(x=>x.classList.toggle('on',x.dataset.tab===tab));
+  render();
+}));
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeProp(); });
+
+/* PWA:仅 http(s) 下注册 Service Worker(file:// 打开时自动跳过) */
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+load(); render(); handleHashImport(); detectLocalAI();
+</script>
+</body>
+</html>
